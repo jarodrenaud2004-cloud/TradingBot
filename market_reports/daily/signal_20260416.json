@@ -1,0 +1,258 @@
+{
+  "date": "2026-04-16",
+  "generated_at": "2026-04-16T20:00:00+02:00",
+  "report_type": "daily_summary",
+  "global_signal": "MIXED",
+  "alert_level": "MODERATE",
+  "market_context": {
+    "dominant_theme": "US-Iran ceasefire hopes driving risk-on sentiment; Hormuz blockade fully implemented but diplomatic resolution being negotiated",
+    "imf_global_growth_2026": 3.1,
+    "global_inflation_2026": 4.4,
+    "hormuz_status": "BLOCKADED",
+    "ceasefire_status": "UNDER_NEGOTIATION"
+  },
+  "assets": {
+    "EURUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "current_level": 1.1700,
+      "key_levels": [1.1600, 1.1744, 1.1800],
+      "support": 1.1600,
+      "resistance": 1.1800,
+      "notes": "DXY retreat supports EUR upside; ECB rate hold expected; Fibo 0.382 recovery"
+    },
+    "GBPUSD": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "current_level": 1.3380,
+      "key_levels": [1.3234, 1.3433, 1.3500],
+      "support": 1.3234,
+      "resistance": 1.3433,
+      "notes": "Bearish structure intact; rejected at Fibo 0.382; BOE dovish pivot signals; below all key MAs"
+    },
+    "USDJPY": {
+      "bias": "BULLISH",
+      "confidence": "LOW",
+      "current_level": 150.50,
+      "key_levels": [148.00, 150.00, 153.00],
+      "support": 148.00,
+      "resistance": 153.00,
+      "notes": "BOJ ultra-cautious; yen structurally weak; geopolitical JPY haven flows are counterweight"
+    },
+    "USDCHF": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "current_level": null,
+      "key_levels": [],
+      "support": null,
+      "resistance": null,
+      "notes": "CHF benefits from haven flows; precise data not available"
+    },
+    "XAUUSD": {
+      "bias": "BULLISH",
+      "confidence": "HIGH",
+      "current_level": 4827.00,
+      "key_levels": [4700.00, 4841.85, 5000.00, 5400.00],
+      "support": 4700.00,
+      "resistance": 5000.00,
+      "notes": "Geopolitical safe haven + central bank buying + inflation fears; GS target 5400 by end 2026; consolidation near ATH"
+    },
+    "XAGUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "current_level": 80.33,
+      "key_levels": [79.00, 80.00, 85.00],
+      "support": 79.00,
+      "resistance": 85.00,
+      "notes": "+1.74% today; industrial demand (semiconductors, solar) + geopolitical haven"
+    },
+    "SP500": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "current_level": 7020,
+      "key_levels": [6800, 7000, 7200],
+      "support": 6800,
+      "resistance": 7200,
+      "notes": "New all-time high; S&P recovered all losses since Iran war started; tech leading; Iran news dependency HIGH"
+    },
+    "NASDAQ": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "current_level": null,
+      "key_levels": [],
+      "notes": "+1.59% today; best 11-day streak in history; Broadcom, Meta, Tesla leading; TSMC/NFLX earnings after close today"
+    },
+    "DOW": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "current_level": 48496,
+      "key_levels": [47500, 48000, 49000],
+      "notes": "-0.08% today; industrials and materials lagging; diverging from Nasdaq"
+    },
+    "WTI": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "current_level": 91.91,
+      "key_levels": [88.00, 93.00, 100.00],
+      "support": 88.00,
+      "resistance": 100.00,
+      "notes": "+0.68% today; Hormuz blockade vs ceasefire hopes creates equilibrium; extreme volatility risk on any diplomatic news"
+    },
+    "BRENT": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "current_level": 94.89,
+      "key_levels": [90.00, 95.00, 100.00],
+      "support": 90.00,
+      "resistance": 100.00,
+      "notes": "-0.04% today; stabilizing above 94; awaiting diplomatic resolution"
+    },
+    "NIKKEI": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "current_level": null,
+      "key_levels": [],
+      "notes": "+0.81% to record high; driven by Iran deal hopes; BOJ cautious supporting equities"
+    },
+    "HANGSENG": {
+      "bias": "BULLISH",
+      "confidence": "LOW",
+      "current_level": 26129,
+      "key_levels": [25000, 26000, 27000],
+      "notes": "Futures +0.7% vs prior close; geopolitical optimism lifting Asian markets"
+    }
+  },
+  "risk_indicators": {
+    "VIX": {
+      "value": 18.17,
+      "interpretation": "MODERATE",
+      "notes": "Well below crisis peak; could spike to 25-30 on Iran news reversal"
+    },
+    "US_10Y_yield": {
+      "value": 4.31,
+      "trend": "RISING",
+      "notes": "Data from April 10; Fed hawkish stance supporting yields"
+    },
+    "US_2Y_yield": {
+      "value": 3.81,
+      "spread_10Y_2Y": 0.50,
+      "curve_status": "NORMAL (no longer inverted)",
+      "notes": "Normalization of curve; rates expected to stay elevated"
+    },
+    "fear_greed_index": {
+      "value": 56,
+      "status": "GREED",
+      "notes": "Equity sentiment recovered to greed zone on ceasefire hopes; beware reversal"
+    },
+    "dxy": {
+      "value": 103.24,
+      "recent_high": 103.80,
+      "key_support": 103.00,
+      "trend": "RETREATING from 3-month highs"
+    }
+  },
+  "central_banks": {
+    "FED": {"next_meeting": "2026-04-30", "current_stance": "HAWKISH", "expected_action": "HOLD"},
+    "ECB": {"next_meeting": "2026-04-30", "current_stance": "NEUTRAL_TO_DOVISH", "expected_action": "HOLD_OR_CUT"},
+    "BOJ": {"next_meeting": "2026-05", "current_stance": "ULTRA_DOVISH", "expected_action": "HOLD"},
+    "BOE": {"next_meeting": "2026-05", "current_stance": "DOVISH", "expected_action": "CUT"}
+  },
+  "key_risks": [
+    {
+      "risk": "Iran-US negotiations collapse / ceasefire failure",
+      "probability": "MEDIUM",
+      "impact": "CRITICAL",
+      "affected_assets": ["WTI", "BRENT", "XAUUSD", "SP500", "NASDAQ", "USDJPY", "VIX"],
+      "direction": "Oil spike >100$; equities crash; gold >5000$; JPY/CHF surge"
+    },
+    {
+      "risk": "TSMC or NFLX earnings miss (after-hours April 16)",
+      "probability": "LOW",
+      "impact": "HIGH",
+      "affected_assets": ["NASDAQ", "SP500"],
+      "direction": "Nasdaq futures drop; tech selloff"
+    },
+    {
+      "risk": "Fed hawkish surprise (unexpected data or speech)",
+      "probability": "LOW",
+      "impact": "MEDIUM",
+      "affected_assets": ["EURUSD", "XAUUSD", "SP500"],
+      "direction": "USD strength; equity pressure; gold pullback"
+    },
+    {
+      "risk": "Conflict escalation to other regional actors (Saudi Arabia, Israel)",
+      "probability": "LOW",
+      "impact": "CRITICAL",
+      "affected_assets": ["ALL"],
+      "direction": "Global systemic risk-off"
+    }
+  ],
+  "opportunities": [
+    {
+      "rank": 1,
+      "asset": "XAUUSD",
+      "direction": "LONG",
+      "entry_zone": "4700-4750",
+      "target": 5000,
+      "stop_loss": 4600,
+      "confidence": "HIGH",
+      "rationale": "Geopolitical + inflationary + central bank buying convergence; GS end-2026 target 5400"
+    },
+    {
+      "rank": 2,
+      "asset": "NASDAQ",
+      "direction": "LONG",
+      "entry_zone": "on intraday pullbacks",
+      "target": "new highs",
+      "stop_loss": "below prior day low",
+      "confidence": "MEDIUM",
+      "rationale": "Record 11-day streak; AI theme dominant (Broadcom, Meta, Tesla); tight stop mandatory"
+    },
+    {
+      "rank": 3,
+      "asset": "GBPUSD",
+      "direction": "SHORT",
+      "entry_zone": "1.3400-1.3430",
+      "target": 1.3230,
+      "stop_loss": 1.3510,
+      "confidence": "MEDIUM",
+      "rationale": "Bearish technical structure confirmed; BOE dovish signals; Fibo rejection"
+    },
+    {
+      "rank": 4,
+      "asset": "XAGUSD",
+      "direction": "LONG",
+      "entry_zone": "79.00-80.00",
+      "target": 85.00,
+      "stop_loss": 77.50,
+      "confidence": "MEDIUM",
+      "rationale": "Strong momentum +1.74%; correlated with gold; industrial demand supporting"
+    }
+  ],
+  "tomorrow_events": [
+    {
+      "time": "08:30 ET",
+      "indicator": "New Residential Construction (Housing Starts)",
+      "country": "US",
+      "importance": "MEDIUM"
+    },
+    {
+      "time": "12:45 ET",
+      "indicator": "NY Fed Staff Nowcast",
+      "country": "US",
+      "importance": "MEDIUM"
+    },
+    {
+      "time": "Pre-market",
+      "indicator": "Q1 Earnings: ~22 companies reporting (post-market tonight: TSMC, NFLX)",
+      "country": "US",
+      "importance": "HIGH"
+    }
+  ],
+  "trading_recommendations": {
+    "position_sizing": "Reduce 20-30% from normal size due to geopolitical uncertainty",
+    "risk_hours_to_avoid": ["08:30 ET (US data)", "14:30-15:30 ET (US open + potential announcements)", "Evening US (diplomatic news)"],
+    "overnight_positioning": "CAUTION: Reduce overnight exposure; weekend diplomatic developments unpredictable",
+    "stop_losses": "MANDATORY on all positions before session open"
+  }
+}

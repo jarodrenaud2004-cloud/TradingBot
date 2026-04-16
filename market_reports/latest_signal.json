@@ -1,0 +1,28 @@
+{
+  "last_updated": "2026-04-16T20:00:00+02:00",
+  "date": "2026-04-16",
+  "report_file": "market_reports/daily/report_20260416.md",
+  "signal_file": "market_reports/daily/signal_20260416.json",
+  "global_signal": "MIXED",
+  "alert_level": "MODERATE",
+  "top_opportunity": "XAUUSD LONG (HIGH confidence)",
+  "summary": "Risk-on avec réserves. Optimisme Iran/ceasefire porte S&P500 et Nasdaq à des records historiques. Or à 4827$/oz. Pétrole volatil entre 91-95$. VIX modéré à 18.17. Vigilance obligatoire sur tout retournement diplomatique.",
+  "assets_quick": {
+    "EURUSD": {"bias": "BULLISH", "confidence": "MEDIUM", "level": "~1.1700"},
+    "GBPUSD": {"bias": "BEARISH", "confidence": "MEDIUM", "level": "~1.3380"},
+    "USDJPY": {"bias": "BULLISH", "confidence": "LOW", "level": "~150.50"},
+    "XAUUSD": {"bias": "BULLISH", "confidence": "HIGH", "level": "4827.00"},
+    "XAGUSD": {"bias": "BULLISH", "confidence": "MEDIUM", "level": "80.33"},
+    "SP500": {"bias": "BULLISH", "confidence": "MEDIUM", "level": "7020"},
+    "WTI": {"bias": "NEUTRAL", "confidence": "LOW", "level": "91.91"},
+    "BRENT": {"bias": "NEUTRAL", "confidence": "LOW", "level": "94.89"}
+  },
+  "risk_indicators": {
+    "VIX": 18.17,
+    "US_10Y": 4.31,
+    "US_2Y": 3.81,
+    "fear_greed": 56,
+    "DXY": 103.24
+  },
+  "generated_by": "daily-market-summary-20h automated task"
+}
