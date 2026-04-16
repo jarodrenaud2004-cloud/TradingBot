@@ -6,12 +6,21 @@ import schedule
 import time
 import threading
 import asyncio
-from config import MARCHES, INTERVALLE_ANALYSE_MIN, HEURE_RAPPORT_MATIN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
+from config import MARCHES, INTERVALLE_ANALYSE_MIN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 from analysis.scoring import analyser_marche, formater_message
 from data.calendrier import verifier_alertes_proches, formater_alerte_imminente
-from data.rapport import generer_rapport_matin
+from data.rapport import (
+    generer_rapport_matin,
+    generer_briefing_ouverture,
+    generer_rapport_cloture,
+    detecter_volatilite,
+    formater_alerte_volatilite
+)
 from telegram_bot import lancer_bot
 from telegram.ext import Application
+
+# Garde en mémoire les signaux déjà envoyés (évite les doublons)
+signaux_envoyes = set()
 
 def envoyer_message(texte):
     """Envoie un message Telegram depuis un thread"""
@@ -26,48 +35,96 @@ def envoyer_message(texte):
     asyncio.run(_send())
 
 def scan_automatique():
-    """Scan automatique toutes les heures"""
-    print(f"\n🔍 Scan automatique en cours...")
+    """Scan + alertes signaux en temps réel"""
+    global signaux_envoyes
+    print(f"\n🔍 Scan automatique...")
+
     for nom_marche in MARCHES.keys():
         try:
             resultats = analyser_marche(nom_marche)
             if resultats and resultats.get("signal"):
-                message = formater_message(resultats)
-                if message:
-                    envoyer_message(f"🔔 *ALERTE AUTOMATIQUE*\n\n{message}")
-                    print(f"✅ Signal: {nom_marche} {resultats['direction']}")
+                cle = f"{nom_marche}_{resultats['direction']}"
+                if cle not in signaux_envoyes:
+                    message = formater_message(resultats)
+                    if message:
+                        envoyer_message(f"🔔 *SIGNAL DÉTECTÉ*\n\n{message}")
+                        signaux_envoyes.add(cle)
+                        print(f"✅ Signal: {nom_marche} {resultats['direction']}")
+            else:
+                # Reset signal si plus actif
+                for direction in ["BUY", "SELL"]:
+                    cle = f"{nom_marche}_{direction}"
+                    signaux_envoyes.discard(cle)
         except Exception as e:
             print(f"Erreur scan {nom_marche}: {e}")
 
+def verifier_volatilite():
+    """Vérifie les mouvements forts sur tous les marchés"""
+    print("📊 Vérification volatilité...")
+    try:
+        alertes = detecter_volatilite()
+        for alerte in alertes:
+            message = formater_alerte_volatilite(alerte)
+            envoyer_message(message)
+            print(f"⚡ Volatilité: {alerte['marche']} {alerte['variation']:+.2f}%")
+    except Exception as e:
+        print(f"Erreur volatilité: {e}")
+
 def verifier_calendrier():
-    """Vérifie les annonces importantes dans les 30 prochaines minutes"""
-    alertes = verifier_alertes_proches()
-    for evt in alertes:
-        try:
+    """Alertes 30 min avant les annonces"""
+    try:
+        alertes = verifier_alertes_proches()
+        for evt in alertes:
             message = formater_alerte_imminente(evt)
             envoyer_message(message)
-            print(f"⚠️ Alerte: {evt['nom']}")
-        except Exception as e:
-            print(f"Erreur calendrier: {e}")
+            print(f"⚠️ Alerte calendrier: {evt['nom']}")
+    except Exception as e:
+        print(f"Erreur calendrier: {e}")
 
 def rapport_matin():
-    """Envoie le rapport du matin"""
     try:
-        print("📊 Envoi du rapport du matin...")
-        rapport = generer_rapport_matin()
-        envoyer_message(rapport)
+        envoyer_message(generer_rapport_matin())
+        print("📊 Rapport matin envoyé")
     except Exception as e:
-        print(f"Erreur rapport: {e}")
+        print(f"Erreur rapport matin: {e}")
+
+def briefing_ouverture():
+    try:
+        envoyer_message(generer_briefing_ouverture())
+        print("🔔 Briefing ouverture envoyé")
+    except Exception as e:
+        print(f"Erreur briefing: {e}")
+
+def rapport_cloture():
+    try:
+        envoyer_message(generer_rapport_cloture())
+        print("🌆 Rapport clôture envoyé")
+    except Exception as e:
+        print(f"Erreur rapport clôture: {e}")
 
 def demarrer_taches():
     """Lance toutes les tâches automatiques"""
-    schedule.every(INTERVALLE_ANALYSE_MIN).minutes.do(scan_automatique)
-    schedule.every(15).minutes.do(verifier_calendrier)
-    schedule.every().day.at(HEURE_RAPPORT_MATIN).do(rapport_matin)
+    # Rapports journaliers
+    schedule.every().day.at("08:00").do(rapport_matin)
+    schedule.every().day.at("09:00").do(briefing_ouverture)
+    schedule.every().day.at("18:00").do(rapport_cloture)
 
-    print(f"✅ Scan automatique toutes les {INTERVALLE_ANALYSE_MIN} min")
-    print(f"✅ Rapport matin chaque jour à {HEURE_RAPPORT_MATIN}")
-    print(f"✅ Alertes calendrier toutes les 15 min")
+    # Scans automatiques
+    schedule.every(INTERVALLE_ANALYSE_MIN).minutes.do(scan_automatique)
+
+    # Volatilité — toutes les 30 min
+    schedule.every(30).minutes.do(verifier_volatilite)
+
+    # Calendrier — toutes les 15 min
+    schedule.every(15).minutes.do(verifier_calendrier)
+
+    print("✅ Tâches programmées:")
+    print("   📊 Rapport matin    → 08:00")
+    print("   🔔 Briefing EU      → 09:00")
+    print("   🌆 Rapport clôture  → 18:00")
+    print("   🔍 Scan signaux     → toutes les 60 min")
+    print("   ⚡ Alerte volatilité → toutes les 30 min")
+    print("   📅 Alertes calendrier → toutes les 15 min")
 
     while True:
         schedule.run_pending()
