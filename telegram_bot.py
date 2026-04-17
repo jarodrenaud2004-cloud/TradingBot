@@ -10,9 +10,9 @@ from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, MARCHES
 from analysis.scoring import analyser_marche, formater_message
 from data.calendrier import formater_calendrier_semaine, get_evenements_aujourd_hui, formater_alerte_imminente
 from analysis.positions import proposer_position, formater_position, analyser_tous_et_proposer
-from data.broker import (
-    placer_ordre, fermer_position, fermer_tout,
-    get_positions_ouvertes, formater_positions_telegram, get_solde
+from data.paper_trading import (
+    ouvrir_trade, fermer_trade, fermer_tous,
+    formater_portefeuille, formater_historique, get_compte
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -193,17 +193,16 @@ async def cmd_aujourd_hui(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 # ── /compte ────────────────────────────────────────────────
 async def cmd_compte(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not autorise(update): return
-    solde = get_solde()
-    if "error" in solde:
-        await update.message.reply_text(f"❌ Erreur connexion OANDA:\n`{solde['error']}`", parse_mode="Markdown")
-        return
-    emoji = "📈" if solde["pl"] >= 0 else "📉"
-    msg  = "💳 *COMPTE OANDA (DÉMO)*\n"
+    c = get_compte()
+    emoji = "📈" if c["pl_ouvert"] >= 0 else "📉"
+    msg  = "💳 *COMPTE PAPER TRADING*\n"
     msg += "━━━━━━━━━━━━━━━━━━\n\n"
-    msg += f"💰 *Solde:* `{solde['balance']:,.2f} {solde['currency']}`\n"
-    msg += f"📊 *Valeur nette:* `{solde['nav']:,.2f} {solde['currency']}`\n"
-    msg += f"{emoji} *P&L total:* `{solde['pl']:+,.2f} {solde['currency']}`\n"
-    msg += f"📂 *Positions ouvertes:* `{solde['openTrades']}`"
+    msg += f"💰 *Solde:* `{c['solde']:,.2f} €`\n"
+    msg += f"💼 *Valeur nette:* `{c['valeur_nette']:,.2f} €`\n"
+    msg += f"{emoji} *P&L ouvert:* `{c['pl_ouvert']:+.2f} €`\n"
+    msg += f"📈 *P&L réalisé:* `{c['pl_realise']:+.2f} €`\n"
+    msg += f"📂 *Positions ouvertes:* `{c['nb_trades']}`\n"
+    msg += f"📋 *Trades terminés:* `{c['nb_historique']}`"
     await update.message.reply_text(msg, parse_mode="Markdown")
 
 # ── /executer ──────────────────────────────────────────────
@@ -213,7 +212,7 @@ async def cmd_executer(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not ctx.args:
         await update.message.reply_text(
             "Usage: /executer MARCHE\nEx: /executer WTI\nEx: /executer GOLD\n\n"
-            "⚠️ Analyse le marché et ouvre une position automatiquement sur OANDA démo."
+            "🤖 Analyse le marché et simule une position automatiquement."
         )
         return
 
@@ -222,9 +221,8 @@ async def cmd_executer(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Marché inconnu: {marche}")
         return
 
-    await update.message.reply_text(f"⏳ Analyse et exécution sur {marche}...")
+    await update.message.reply_text(f"⏳ Analyse de {marche} en cours...")
 
-    # Analyser le marché
     pos = proposer_position(marche)
     if not pos or pos["direction"] == "NEUTRE":
         await update.message.reply_text(
@@ -234,45 +232,47 @@ async def cmd_executer(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     if pos["ratio"] < 1.5:
         await update.message.reply_text(
-            f"⚠️ Ratio trop faible ({pos['ratio']}) sur {marche}.\nAucune position ouverte."
+            f"⚠️ Ratio trop faible ({pos['ratio']}) sur {marche}.\n"
+            "Attends un meilleur point d'entrée."
         )
         return
 
-    # Afficher l'analyse d'abord
+    # Afficher l'analyse
     msg_analyse = formater_position(pos)
     if msg_analyse:
         await update.message.reply_text(msg_analyse, parse_mode="Markdown")
 
-    # Placer l'ordre
-    await update.message.reply_text("🔄 Exécution de l'ordre sur OANDA...")
-    result = placer_ordre(
+    # Ouvrir le trade simulé
+    trade = ouvrir_trade(
         nom_marche  = marche,
         direction   = pos["direction"],
+        prix_entree = pos["prix_entree"],
         stop_loss   = pos["stop_loss"],
-        take_profit = pos["take_profit"]
+        take_profit = pos["take_profit"],
+        taille      = 100  # 100€ par trade
     )
 
-    if result.get("success"):
-        emoji_dir = "🟢" if pos["direction"] == "BUY" else "🔴"
-        msg  = f"✅ *ORDRE EXÉCUTÉ !*\n\n"
-        msg += f"{emoji_dir} *{pos['direction']} {marche}*\n"
-        msg += f"💰 *Entrée:* `{result['prix']:.5f}`\n"
-        msg += f"🛑 *Stop Loss:* `{result['sl']}`\n"
-        msg += f"🎯 *Take Profit:* `{result['tp']}`\n"
-        msg += f"📦 *Unités:* `{result['units']}`\n"
-        msg += f"🔑 *Trade ID:* `{result['trade_id']}`\n\n"
-        msg += f"Pour fermer: /fermer {result['trade_id']}"
-        await update.message.reply_text(msg, parse_mode="Markdown")
-    else:
-        await update.message.reply_text(
-            f"❌ *Erreur lors de l'exécution:*\n`{result.get('error', 'Inconnue')}`",
-            parse_mode="Markdown"
-        )
+    emoji_dir = "🟢" if pos["direction"] == "BUY" else "🔴"
+    msg  = f"✅ *POSITION OUVERTE !*\n\n"
+    msg += f"{emoji_dir} *{pos['direction']} {marche}*\n"
+    msg += f"💰 *Entrée:* `{trade['prix_entree']}`\n"
+    msg += f"🛑 *Stop Loss:* `{trade['stop_loss']}`\n"
+    msg += f"🎯 *Take Profit:* `{trade['take_profit']}`\n"
+    msg += f"💵 *Taille:* `100 €`\n"
+    msg += f"🔑 *Trade ID:* `{trade['id']}`\n\n"
+    msg += f"Suivi: /portefeuille\nFermer: /fermer {trade['id']}"
+    await update.message.reply_text(msg, parse_mode="Markdown")
 
 # ── /portefeuille ──────────────────────────────────────────
 async def cmd_portefeuille(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not autorise(update): return
-    msg = formater_positions_telegram()
+    msg = formater_portefeuille()
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+# ── /historique ────────────────────────────────────────────
+async def cmd_historique(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if not autorise(update): return
+    msg = formater_historique()
     await update.message.reply_text(msg, parse_mode="Markdown")
 
 # ── /fermer ────────────────────────────────────────────────
@@ -281,39 +281,46 @@ async def cmd_fermer(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     if not ctx.args:
         await update.message.reply_text(
-            "Usage: /fermer TRADE_ID\n"
-            "Ex: /fermer 123\n\n"
-            "Utilise /portefeuille pour voir les IDs de tes positions."
+            "Usage: /fermer ID\nEx: /fermer 1\n"
+            "Ou: /fermer TOUT\n\n"
+            "Utilise /portefeuille pour voir tes IDs."
         )
         return
 
-    trade_id = ctx.args[0]
+    arg = ctx.args[0].upper()
 
-    if trade_id.upper() == "TOUT":
+    if arg == "TOUT":
         await update.message.reply_text("⏳ Fermeture de toutes les positions...")
-        resultats = fermer_tout()
+        resultats = fermer_tous()
         if not resultats:
             await update.message.reply_text("⚪ Aucune position ouverte.")
             return
-        msg = f"✅ *{len(resultats)} position(s) fermée(s)*\n"
-        for r in resultats:
-            ok = "✅" if r["result"].get("success") else "❌"
-            msg += f"{ok} {r['instrument']} (ID: {r['trade_id']})\n"
+        pl_total = sum(t["pl"] for t in resultats)
+        emoji    = "📈" if pl_total >= 0 else "📉"
+        msg = f"✅ *{len(resultats)} position(s) fermée(s)*\n\n"
+        for t in resultats:
+            e = "✅" if t["pl"] >= 0 else "❌"
+            msg += f"{e} {t['direction']} {t['marche']}: `{t['pl']:+.2f} €`\n"
+        msg += f"\n{emoji} *P&L total: `{pl_total:+.2f} €`*"
         await update.message.reply_text(msg, parse_mode="Markdown")
         return
 
-    result = fermer_position(trade_id)
-    if result.get("success"):
-        pl = result["response"].get("orderFillTransaction", {}).get("pl", "?")
-        await update.message.reply_text(
-            f"✅ *Position {trade_id} fermée !*\n💰 P&L réalisé: `{pl}`",
-            parse_mode="Markdown"
-        )
+    try:
+        trade_id = int(arg)
+    except ValueError:
+        await update.message.reply_text("❌ ID invalide. Ex: /fermer 1")
+        return
+
+    trade = fermer_trade(trade_id)
+    if trade:
+        emoji = "📈" if trade["pl"] >= 0 else "📉"
+        msg  = f"✅ *Trade #{trade_id} fermé !*\n\n"
+        msg += f"📊 {trade['direction']} {trade['marche']}\n"
+        msg += f"💰 Entrée: `{trade['prix_entree']}` → Clôture: `{trade['prix_cloture']}`\n"
+        msg += f"{emoji} *P&L réalisé: `{trade['pl']:+.2f} €`*"
+        await update.message.reply_text(msg, parse_mode="Markdown")
     else:
-        await update.message.reply_text(
-            f"❌ Erreur: `{result.get('error', 'Inconnue')}`",
-            parse_mode="Markdown"
-        )
+        await update.message.reply_text(f"❌ Trade #{trade_id} introuvable ou déjà fermé.")
 
 # ── /aide ──────────────────────────────────────────────────
 async def cmd_aide(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -364,6 +371,7 @@ def lancer_bot():
     # Commandes exécution OANDA
     app.add_handler(CommandHandler("executer",       cmd_executer))
     app.add_handler(CommandHandler("portefeuille",   cmd_portefeuille))
+    app.add_handler(CommandHandler("historique",     cmd_historique))
     app.add_handler(CommandHandler("fermer",         cmd_fermer))
     app.add_handler(CommandHandler("compte",         cmd_compte))
 
