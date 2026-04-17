@@ -4,3 +4,4 @@ requests
 schedule
 yfinance
 aiohttp
+oandapyV20

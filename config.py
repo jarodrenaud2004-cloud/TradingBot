@@ -35,6 +35,11 @@ MARCHES = {
     "OR":     {"symbole_yf": "OR.PA",  "nom": "L'Oréal",        "type": "action_eu"},
 }
 
+# --- OANDA (exécution automatique — compte démo) ---
+OANDA_API_KEY     = "TON_TOKEN_OANDA_ICI"       # ← à remplacer après inscription
+OANDA_ACCOUNT_ID  = "TON_ACCOUNT_ID_OANDA_ICI"  # ← ex: 101-001-XXXXXXX-001
+OANDA_ENVIRONMENT = "practice"                   # "practice" = démo / "live" = réel
+
 # --- GESTION DU RISQUE ---
 RISQUE_PAR_TRADE = 1.0
 RATIO_MIN = 2.0
