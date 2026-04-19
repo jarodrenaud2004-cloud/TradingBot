@@ -23,7 +23,10 @@ MARCHES_PRIORITAIRES = ["WTI", "GOLD", "CAC40", "DAX"]
 Z_SCORE_SEUIL = 1.8   # ~95% des mouvements sont en dessous
 
 # Score technique minimum pour alerter
-SCORE_MIN = 2
+SCORE_MIN = 1
+
+# Si z-score extrême, alerter même sans signal technique fort
+Z_SCORE_EXTREME = 2.0
 
 # Fichier des positions en attente de validation
 FICHIER_ATTENTE = "positions_attente.json"
@@ -227,18 +230,26 @@ def scanner_signaux_forts():
             if not resultats:
                 continue
 
-            score = resultats.get("score_total", 0)
-            if abs(score) < SCORE_MIN:
-                continue  # Signal technique trop faible
-
-            # 3. Vérifier la cohérence (z-score et signal dans la même direction)
+            score     = resultats.get("score_total", 0)
             direction = resultats.get("direction", "NEUTRE")
-            if direction == "NEUTRE":
-                continue
-            if direction == "BUY" and variation < 0:
-                continue  # Signal haussier mais mouvement baissier → incohérent
-            if direction == "SELL" and variation > 0:
-                continue
+
+            # Cas extrême : mouvement très fort → alerter même sans signal technique
+            extreme = abs(z_score) >= Z_SCORE_EXTREME
+            if not extreme:
+                if abs(score) < SCORE_MIN:
+                    continue  # Signal technique trop faible
+
+            # 3. Déterminer la direction (signal technique ou mouvement)
+            if direction == "NEUTRE" or abs(score) < SCORE_MIN:
+                # Pas de signal technique → la direction suit le mouvement du prix
+                direction = "SELL" if variation < 0 else "BUY"
+
+            # Cohérence mouvement/signal (seulement si signal technique présent)
+            if abs(score) >= SCORE_MIN and direction != "NEUTRE":
+                if direction == "BUY" and variation < 0:
+                    continue
+                if direction == "SELL" and variation > 0:
+                    continue
 
             # 4. Calculer la position
             pos = proposer_position(nom_marche)
