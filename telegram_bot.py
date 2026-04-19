@@ -14,6 +14,10 @@ from data.paper_trading import (
     ouvrir_trade, fermer_trade, fermer_tous,
     formater_portefeuille, formater_historique, get_compte
 )
+from data.alertes_intelligentes import (
+    get_position_attente, valider_position, ignorer_position,
+    get_positions_en_attente
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -347,6 +351,77 @@ async def cmd_aide(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
+# ── /valider ───────────────────────────────────────────────
+async def cmd_valider(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if not autorise(update): return
+
+    if not ctx.args:
+        # Afficher les positions en attente
+        attente = get_positions_en_attente()
+        if not attente:
+            await update.message.reply_text("⚪ Aucune position en attente de validation.")
+            return
+        msg = f"⏳ *{len(attente)} position(s) en attente:*\n\n"
+        for p in attente:
+            emoji = "🟢" if p["direction"] == "BUY" else "🔴"
+            msg += f"{emoji} *#{p['id']} — {p['direction']} {p['marche']}*\n"
+            msg += f"   Entrée: `{p['prix_entree']}` | R/R: `1:{p['ratio']}`\n"
+            msg += f"   `/valider {p['id']}` pour confirmer\n\n"
+        await update.message.reply_text(msg, parse_mode="Markdown")
+        return
+
+    try:
+        numero = int(ctx.args[0])
+    except ValueError:
+        await update.message.reply_text("❌ Usage: /valider 1")
+        return
+
+    pos = valider_position(numero)
+    if not pos:
+        await update.message.reply_text(f"❌ Position #{numero} introuvable ou déjà traitée.")
+        return
+
+    # Ouvrir le trade dans le paper trading
+    trade = ouvrir_trade(
+        nom_marche  = pos["marche"],
+        direction   = pos["direction"],
+        prix_entree = pos["prix_entree"],
+        stop_loss   = pos["stop_loss"],
+        take_profit = pos["take_profit"],
+        taille      = 100
+    )
+
+    emoji_dir = "🟢" if pos["direction"] == "BUY" else "🔴"
+    msg  = f"✅ *POSITION #{numero} VALIDÉE ET OUVERTE !*\n\n"
+    msg += f"{emoji_dir} *{pos['direction']} {pos['marche']}*\n"
+    msg += f"💰 Entrée:      `{trade['prix_entree']}`\n"
+    msg += f"🛑 Stop Loss:   `{trade['stop_loss']}`\n"
+    msg += f"🎯 Take Profit: `{trade['take_profit']}`\n"
+    msg += f"📊 Ratio R/R:   `1:{pos['ratio']}`\n"
+    msg += f"💵 Taille:      `100 €`\n"
+    msg += f"🔑 Trade ID:    `{trade['id']}`\n\n"
+    msg += f"Suivi: /portefeuille | Fermer: /fermer {trade['id']}"
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+# ── /ignorer ───────────────────────────────────────────────
+async def cmd_ignorer(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if not autorise(update): return
+
+    if not ctx.args:
+        await update.message.reply_text("Usage: /ignorer 1")
+        return
+    try:
+        numero = int(ctx.args[0])
+    except ValueError:
+        await update.message.reply_text("❌ Usage: /ignorer 1")
+        return
+
+    ok = ignorer_position(numero)
+    if ok:
+        await update.message.reply_text(f"❌ Position #{numero} ignorée.")
+    else:
+        await update.message.reply_text(f"❌ Position #{numero} introuvable.")
+
 # ── Envoi d'alerte automatique ─────────────────────────────
 async def envoyer_alerte(app, message):
     """Envoie une alerte automatique sur Telegram"""
@@ -374,6 +449,8 @@ def lancer_bot():
     app.add_handler(CommandHandler("historique",     cmd_historique))
     app.add_handler(CommandHandler("fermer",         cmd_fermer))
     app.add_handler(CommandHandler("compte",         cmd_compte))
+    app.add_handler(CommandHandler("valider",        cmd_valider))
+    app.add_handler(CommandHandler("ignorer",        cmd_ignorer))
 
     print("✅ Bot Telegram démarré !")
     print("📱 Ouvre Telegram et envoie /start à ton bot")

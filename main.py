@@ -18,6 +18,7 @@ from data.rapport import (
 )
 from telegram_bot import lancer_bot
 from telegram.ext import Application
+from data.alertes_intelligentes import scanner_signaux_forts
 
 # Garde en mémoire les signaux déjà envoyés (évite les doublons)
 signaux_envoyes = set()
@@ -81,6 +82,17 @@ def verifier_calendrier():
     except Exception as e:
         print(f"Erreur calendrier: {e}")
 
+def scanner_alertes_intelligentes():
+    """Détecte les mouvements anormaux et envoie des alertes ultra-détaillées"""
+    print("🔍 Scan signaux forts...")
+    try:
+        alertes = scanner_signaux_forts()
+        for alerte in alertes:
+            envoyer_message(alerte["message"])
+            print(f"🚨 Alerte #{alerte['numero']} envoyée : {alerte['marche']}")
+    except Exception as e:
+        print(f"Erreur scan alertes: {e}")
+
 def rapport_matin():
     try:
         envoyer_message(generer_rapport_matin())
@@ -112,11 +124,15 @@ def demarrer_taches():
     # Calendrier — toutes les 15 min
     schedule.every(15).minutes.do(verifier_calendrier)
 
+    # Scan signaux forts — toutes les 30 min
+    schedule.every(30).minutes.do(scanner_alertes_intelligentes)
+
     print("✅ Tâches programmées:")
-    print("   📊 Rapport matin    → 08:00")
-    print("   🔔 Briefing EU      → 09:00")
-    print("   🌆 Rapport clôture  → 18:00")
+    print("   📊 Rapport matin      → 08:00")
+    print("   🔔 Briefing EU        → 09:00")
+    print("   🌆 Rapport clôture    → 18:00")
     print("   📅 Alertes calendrier → toutes les 15 min")
+    print("   🚨 Signaux forts      → toutes les 30 min")
 
     while True:
         schedule.run_pending()
