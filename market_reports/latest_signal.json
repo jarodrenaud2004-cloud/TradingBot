@@ -1,49 +1,94 @@
 {
-  "timestamp": "2026-04-16T14:07:34+02:00",
-  "bias": "NEUTRAL",
-  "markets_watch": [
-    "WTI/Brent Oil — volatilité headline Iran, niveaux clés $95 et $105",
-    "EUR/USD — rupture haussière en cours ~1.1800, surveiller réaction PPI US",
-    "XAU/USD Gold — consolidation à $4800, seuil clé de support",
-    "S&P 500 — momentum positif mais prudence earnings + macro data",
-    "USD/JPY — niveau critique 160, risque intervention BOJ"
-  ],
-  "risks": [
-    "Effondrement négociations US-Iran → rebond pétrole, chute indices, fuite vers refuges",
-    "PPI US supérieur aux attentes → renforcement dollar, pression EUR/USD et indices",
-    "Transition Fed sans heurts non garantie — nouveau Chairman mi-mai 2026",
-    "BCE sous pression si inflation Q2 dépasse 3% (prévision actuelle 3.1%)",
-    "Détroit d'Ormuz toujours fermé — volatilité extrême sur chaque headline"
+  "date": "2026-04-18",
+  "generated_at": "2026-04-18T20:11:00+02:00",
+  "last_updated": "2026-04-18T20:11:00+02:00",
+  "report_type": "daily_summary",
+  "global_signal": "MIXED",
+  "alert_level": "HIGH",
+  "top_opportunity": "XAU/USD LONG — Or en tendance haussière structurelle (guerre Moyen-Orient, inflation 3.3%, DXY faible 98.226)",
+  "assets_quick": {
+    "EURUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": "1.0952"
+    },
+    "GBPUSD": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "level": "N/D"
+    },
+    "USDJPY": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "level": "149.45"
+    },
+    "XAUUSD": {
+      "bias": "BULLISH",
+      "confidence": "HIGH",
+      "level": "4878.00"
+    },
+    "XAGUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": "N/D"
+    },
+    "SP500": {
+      "bias": "NEUTRAL",
+      "confidence": "MEDIUM",
+      "level": "5920"
+    },
+    "WTI": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": "~88-90"
+    }
+  },
+  "risk_indicators": {
+    "VIX": 17.48,
+    "US_10Y": 4.31,
+    "US_2Y": "N/D",
+    "Fear_Greed": 68,
+    "Fear_Greed_label": "Greed",
+    "DXY": 98.226,
+    "DXY_change_pct": -0.52
+  },
+  "key_risks": [
+    "Crise Hormuz : réouverture soudaine du détroit → chute WTI/Brent -10%+",
+    "Escalade militaire majeure Iran/US → risk-off global, S&P 500 en chute",
+    "Signal hawkish Fed inattendu → USD fort, pression sur or et actions",
+    "Déclaration Trump sur Iran → volatilité immédiate sur énergie",
+    "IMF downgrade croissance mondiale 3.1% — risque récession si crise prolongée"
   ],
   "opportunities": [
-    "Accord de paix Iran durable → fort rally risk-on (pétrole ↓, indices ↑, dollar ↑ vs JPY)",
-    "Dollar faible structurellement favorable aux matières premières et marchés émergents",
-    "Saison des résultats solide (tech en tête — Netflix, semi-conducteurs)",
-    "Anticipations 2 baisses Fed 2026 (juin + septembre) soutiennent actifs risqués",
-    "EUR/USD en breakout haussier — potentiel de continuation si PPI conforme aux attentes"
+    {
+      "asset": "XAU/USD",
+      "direction": "LONG",
+      "confidence": "HIGH",
+      "entry": "repli vers 4800-4820",
+      "stop_loss": 4750,
+      "target": "5000+"
+    },
+    {
+      "asset": "EUR/USD",
+      "direction": "LONG",
+      "confidence": "MEDIUM",
+      "entry": "sur repli, DXY faible",
+      "stop_loss": 1.0870,
+      "target": "1.1050"
+    },
+    {
+      "asset": "WTI",
+      "direction": "LONG",
+      "confidence": "MEDIUM",
+      "entry": "88-90",
+      "stop_loss": 85,
+      "target": "95+",
+      "warning": "VOLATILITE EXTREME — stops serrés obligatoires"
+    }
   ],
-  "key_levels": {
-    "EURUSD": {"current": 1.18, "support": 1.171, "resistance": 1.19},
-    "GBPUSD": {"current": 1.355, "note": "hausse en cours"},
-    "USDJPY": {"current": "approche 160", "critical_level": 160},
-    "GOLD_XAU": {"current": 4813, "support": 4750, "resistance": 4850},
-    "OIL_WTI": {"current": "sous 100", "support": 95, "resistance": 105},
-    "SILVER_XAG": {"current": "au-dessus 80", "trend": "haussier"},
-    "SP500": {"current": 7033, "monthly_perf": "+4.72%"}
-  },
-  "macro_events_today": [
-    "US PPI Mars (publication attendue)",
-    "US Weekly Jobless Claims",
-    "US Industrial Production & Capacity Utilization",
-    "Earnings: Netflix, PepsiCo, Charles Schwab"
-  ],
-  "geopolitical_status": {
-    "us_iran": "Cessez-le-feu fragile en cours — extension de principe mais non confirmée officiellement. Détroit d'Ormuz bloqué.",
-    "risk_level": "ÉLEVÉ — risque binaire majeur"
-  },
-  "central_banks": {
-    "fed_rate": "Pause — prochaines baisses anticipées juin + septembre 2026",
-    "ecb_rate": "2.15% (refi) / 2.0% (dépôt) — inchangé depuis mars 2026",
-    "fed_leadership": "Transition en cours — Powell quitte le 15 mai 2026"
-  }
+  "tomorrow_events": [
+    "Évolution crise Iran/Hormuz (CRITIQUE — impact direct WTI/XAUUSD/SP500)",
+    "PMI flash avril US/EU/UK (IMPORTANT)",
+    "Saison des résultats Q1 (MODERE)"
+  ]
 }

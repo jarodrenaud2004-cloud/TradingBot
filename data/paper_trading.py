@@ -10,7 +10,7 @@ from data.prix import get_prix_actuel
 from config import MARCHES
 
 FICHIER_TRADES  = "paper_trades.json"
-SOLDE_INITIAL   = 10000.0   # 10 000 € de départ
+SOLDE_INITIAL   = 250.0     # 250 € de départ
 
 # ── Charger / sauvegarder ─────────────────────────────────
 def _charger():

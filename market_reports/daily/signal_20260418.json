@@ -1,0 +1,157 @@
+{
+  "date": "2026-04-18",
+  "generated_at": "2026-04-18T20:11:00+02:00",
+  "report_type": "daily_summary",
+  "last_updated": "2026-04-18T20:11:00+02:00",
+  "global_signal": "MIXED",
+  "alert_level": "HIGH",
+  "top_opportunity": "XAU/USD LONG — Or en tendance haussière structurelle (guerre Moyen-Orient, inflation 3.3%, DXY faible à 98.226)",
+  "assets_quick": {
+    "EURUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": "~1.1780",
+      "note": "DXY faible, sous résistance 1.1800"
+    },
+    "GBPUSD": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "level": "N/D",
+      "note": "Données insuffisantes, suit dynamique USD"
+    },
+    "USDJPY": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "level": "N/D",
+      "note": "Yen valeur refuge recherché, pression baissière sur USDJPY"
+    },
+    "XAUUSD": {
+      "bias": "BULLISH",
+      "confidence": "HIGH",
+      "level": "4867.39",
+      "note": "Record historique, +1.65% le 17 avril. Tous catalyseurs alignés (guerre, inflation, DXY faible)"
+    },
+    "XAGUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": "N/D",
+      "note": "Suit l'or, corrélation positive"
+    },
+    "SP500": {
+      "bias": "NEUTRAL",
+      "confidence": "MEDIUM",
+      "level": "~5900+",
+      "note": "+0.2% le 17 avril, nouveau record. VIX 17.48, Fear&Greed 68"
+    },
+    "WTI": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": "~88-90",
+      "note": "Hormuz refermé le 18 avril. VOLATILITÉ EXTRÊME — stops serrés obligatoires"
+    }
+  },
+  "assets": {
+    "EURUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "key_levels": [1.1720, 1.1800, 1.1920, 1.1950]
+    },
+    "GBPUSD": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "key_levels": []
+    },
+    "USDJPY": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "key_levels": []
+    },
+    "XAUUSD": {
+      "bias": "BULLISH",
+      "confidence": "HIGH",
+      "key_levels": [4750, 4800, 4820, 4867, 5000]
+    },
+    "SP500": {
+      "bias": "NEUTRAL",
+      "confidence": "MEDIUM",
+      "key_levels": []
+    },
+    "WTI": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "key_levels": [85, 88, 90, 95, 100]
+    }
+  },
+  "risk_indicators": {
+    "VIX": 17.48,
+    "VIX_signal": "MODERE — sous le seuil d'alerte de 25",
+    "US_10Y": 4.31,
+    "US_2Y": "N/D",
+    "Fear_Greed": 68,
+    "Fear_Greed_label": "Greed",
+    "DXY": 98.226,
+    "DXY_change_pct": -0.52
+  },
+  "key_risks": [
+    "Crise Hormuz : réouverture soudaine du détroit → chute WTI/Brent -10%+",
+    "Escalade militaire majeure Iran/US → risk-off global, S&P 500 en chute",
+    "Signal hawkish Fed inattendu → USD fort, pression sur or et actions",
+    "Déclaration Trump sur Iran → volatilité immédiate sur énergie",
+    "Données économiques récession → liquidation positions longues"
+  ],
+  "opportunities": [
+    {
+      "asset": "XAU/USD",
+      "direction": "LONG",
+      "confidence": "HIGH",
+      "entry": "repli vers 4800-4820",
+      "stop_loss": 4750,
+      "target": "5000+",
+      "rationale": "Tendance haussière structurelle, guerre Moyen-Orient, inflation 3.3%, DXY faible"
+    },
+    {
+      "asset": "EUR/USD",
+      "direction": "LONG",
+      "confidence": "MEDIUM",
+      "entry": "cassure confirmée au-dessus de 1.1800",
+      "stop_loss": 1.1720,
+      "target": "1.1920-1.1950",
+      "rationale": "Dollar structurellement faible, DXY à 98.226 en baisse"
+    },
+    {
+      "asset": "WTI",
+      "direction": "LONG",
+      "confidence": "MEDIUM",
+      "entry": "88-89 $/b",
+      "stop_loss": 85,
+      "target": "95+",
+      "rationale": "Hormuz refermé, offre mondiale -10 Mb/j. ATTENTION : volatilité extrême, stops serrés"
+    }
+  ],
+  "tomorrow_events": [
+    {
+      "event": "Évolution diplomatique crise Iran/Hormuz",
+      "importance": "CRITICAL",
+      "assets_impacted": ["WTI", "XAUUSD", "USDJPY", "SP500"]
+    },
+    {
+      "event": "PMI flash avril (US/EU/UK)",
+      "importance": "HIGH",
+      "assets_impacted": ["EURUSD", "GBPUSD", "SP500"]
+    },
+    {
+      "event": "Résultats Q1 (saison des earnings)",
+      "importance": "MEDIUM",
+      "assets_impacted": ["SP500"]
+    }
+  ],
+  "macro_context": {
+    "imf_growth_2026": 3.1,
+    "imf_growth_2026_previous": 3.3,
+    "imf_inflation_2026": 4.4,
+    "crisis": "Guerre Moyen-Orient / Blocus détroit d'Ormuz",
+    "oil_supply_disruption_mb_d": -10.1,
+    "brent_pre_crisis": 70,
+    "brent_current": 96
+  }
+}
