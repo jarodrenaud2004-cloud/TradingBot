@@ -109,12 +109,6 @@ def demarrer_taches():
     schedule.every().day.at("09:00").do(briefing_ouverture)
     schedule.every().day.at("18:00").do(rapport_cloture)
 
-    # Scans automatiques
-    schedule.every(INTERVALLE_ANALYSE_MIN).minutes.do(scan_automatique)
-
-    # Volatilité — toutes les 30 min
-    schedule.every(30).minutes.do(verifier_volatilite)
-
     # Calendrier — toutes les 15 min
     schedule.every(15).minutes.do(verifier_calendrier)
 
@@ -122,8 +116,6 @@ def demarrer_taches():
     print("   📊 Rapport matin    → 08:00")
     print("   🔔 Briefing EU      → 09:00")
     print("   🌆 Rapport clôture  → 18:00")
-    print("   🔍 Scan signaux     → toutes les 60 min")
-    print("   ⚡ Alerte volatilité → toutes les 30 min")
     print("   📅 Alertes calendrier → toutes les 15 min")
 
     while True:

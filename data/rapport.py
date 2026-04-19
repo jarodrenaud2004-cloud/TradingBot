@@ -169,7 +169,7 @@ def detecter_volatilite():
                 prix_hier   = hist["Close"].iloc[-2]
                 variation   = ((prix_actuel - prix_hier) / prix_hier) * 100
 
-                if abs(variation) >= 2.0:
+                if abs(variation) >= 5.0:
                     alertes.append({
                         "marche":    info["nom"],
                         "symbole":   nom,
