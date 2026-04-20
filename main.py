@@ -19,6 +19,7 @@ from data.rapport import (
 from telegram_bot import lancer_bot
 from telegram.ext import Application
 from data.alertes_intelligentes import scanner_signaux_forts
+from analysis.performance import formater_rapport_mensuel
 
 # Garde en mémoire les signaux déjà envoyés (évite les doublons)
 signaux_envoyes = set()
@@ -82,6 +83,13 @@ def verifier_calendrier():
     except Exception as e:
         print(f"Erreur calendrier: {e}")
 
+def rapport_mensuel():
+    try:
+        envoyer_message(formater_rapport_mensuel())
+        print("📊 Rapport mensuel envoyé")
+    except Exception as e:
+        print(f"Erreur rapport mensuel: {e}")
+
 def scanner_alertes_intelligentes():
     """Détecte les mouvements anormaux et envoie des alertes ultra-détaillées"""
     print("🔍 Scan signaux forts...")
@@ -127,12 +135,18 @@ def demarrer_taches():
     # Scan signaux forts — toutes les 30 min
     schedule.every(30).minutes.do(scanner_alertes_intelligentes)
 
+    # Rapport mensuel — le 1er du mois à 09:00
+    schedule.every().day.at("09:05").do(
+        lambda: rapport_mensuel() if __import__('datetime').datetime.now().day == 1 else None
+    )
+
     print("✅ Tâches programmées:")
     print("   📊 Rapport matin      → 08:00")
     print("   🔔 Briefing EU        → 09:00")
     print("   🌆 Rapport clôture    → 18:00")
     print("   📅 Alertes calendrier → toutes les 15 min")
     print("   🚨 Signaux forts      → toutes les 30 min")
+    print("   📊 Rapport mensuel    → 1er du mois")
 
     while True:
         schedule.run_pending()

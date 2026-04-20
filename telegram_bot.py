@@ -18,6 +18,11 @@ from data.alertes_intelligentes import (
     get_position_attente, valider_position, ignorer_position,
     get_positions_en_attente
 )
+from analysis.performance  import formater_performance
+from analysis.risk_manager import formater_etat_risque
+from analysis.regime       import analyser_regime_complet, get_vix, interpreter_vix
+from analysis.sentiment    import formater_sentiment, get_fear_greed_index
+from data.prix             import get_historique
 
 logging.basicConfig(level=logging.INFO)
 
@@ -34,12 +39,16 @@ async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         "/scan — Scanner tous les marchés\n"
         "/analyse WTI — Analyser un marché\n"
         "/position WTI — Proposition de position\n\n"
-        "🤖 *Exécution automatique (OANDA démo):*\n"
+        "🤖 *Exécution & Suivi:*\n"
         "/executer WTI — Ouvrir une position\n"
-        "/portefeuille — Voir positions ouvertes\n"
-        "/fermer 123 — Fermer une position\n"
-        "/fermer TOUT — Tout fermer\n"
-        "/compte — Solde du compte démo\n\n"
+        "/valider 1 — Valider une alerte\n"
+        "/portefeuille — Positions ouvertes\n"
+        "/fermer 1 — Fermer une position\n"
+        "/compte — Solde du compte\n\n"
+        "📊 *Analyse Expert:*\n"
+        "/marche WTI — Analyse ultra-complète\n"
+        "/performance — Mes statistiques\n"
+        "/risque — Gestionnaire de risque\n\n"
         "📅 *Calendrier:*\n"
         "/calendrier — Annonces de la semaine\n"
         "/aujourd\\_hui — Annonces du jour\n\n"
@@ -351,6 +360,76 @@ async def cmd_aide(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
+# ── /performance ───────────────────────────────────────────
+async def cmd_performance(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if not autorise(update): return
+    await update.message.reply_text("⏳ Calcul des performances...")
+    msg = formater_performance()
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+# ── /risque ────────────────────────────────────────────────
+async def cmd_risque(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if not autorise(update): return
+    msg = formater_etat_risque()
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+# ── /marche ────────────────────────────────────────────────
+async def cmd_marche(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    """Analyse ultra-complète d'un marché avec tous les indicateurs"""
+    if not autorise(update): return
+
+    if not ctx.args:
+        await update.message.reply_text("Usage: /marche WTI\nEx: /marche GOLD")
+        return
+
+    nom = ctx.args[0].upper()
+    if nom not in MARCHES:
+        await update.message.reply_text(f"Marché inconnu: {nom}")
+        return
+
+    await update.message.reply_text(f"⏳ Analyse complète de {nom}...")
+
+    info = MARCHES[nom]
+    hist = get_historique(info["symbole_yf"], periode="3mo", intervalle="1d")
+
+    msg = f"🔬 *ANALYSE COMPLÈTE — {info['nom']}*\n"
+    msg += "━━━━━━━━━━━━━━━━━━\n\n"
+
+    # Régime
+    if hist is not None and not hist.empty:
+        from analysis.regime import detecter_regime, analyser_correlations, get_saisonnalite
+        regime, adx, desc = detecter_regime(hist)
+        msg += f"📊 *Régime:* {desc}\n"
+        correls = analyser_correlations(nom)
+        for c in correls:
+            msg += f"• {c}\n"
+        saison = get_saisonnalite(nom)
+        if saison:
+            msg += f"• {saison}\n"
+        msg += "\n"
+
+    # Indicateurs
+    if hist is not None and not hist.empty:
+        from analysis.indicateurs import analyser_tous_indicateurs, formater_indicateurs
+        _, details_ind = analyser_tous_indicateurs(hist)
+        msg += formater_indicateurs(details_ind) + "\n"
+
+    # Chandeliers
+    if hist is not None and not hist.empty:
+        from analysis.chandeliers import detecter_patterns, formater_patterns
+        patterns = detecter_patterns(hist)
+        fmt = formater_patterns(patterns)
+        if fmt:
+            msg += fmt + "\n"
+
+    # VIX + Sentiment
+    vix = get_vix()
+    _, desc_vix = interpreter_vix(vix)
+    msg += f"😰 {desc_vix}\n"
+    msg += formater_sentiment(nom) + "\n"
+
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
 # ── /valider ───────────────────────────────────────────────
 async def cmd_valider(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not autorise(update): return
@@ -451,6 +530,9 @@ def lancer_bot():
     app.add_handler(CommandHandler("compte",         cmd_compte))
     app.add_handler(CommandHandler("valider",        cmd_valider))
     app.add_handler(CommandHandler("ignorer",        cmd_ignorer))
+    app.add_handler(CommandHandler("performance",    cmd_performance))
+    app.add_handler(CommandHandler("risque",         cmd_risque))
+    app.add_handler(CommandHandler("marche",         cmd_marche))
 
     print("✅ Bot Telegram démarré !")
     print("📱 Ouvre Telegram et envoie /start à ton bot")

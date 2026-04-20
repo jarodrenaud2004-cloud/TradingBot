@@ -186,6 +186,30 @@ def get_contexte_macro(nom_marche):
         except:
             contexte["cot"] = None
 
+    # Indicateurs techniques avancés
+    if hist is not None and not hist.empty:
+        try:
+            from analysis.indicateurs import analyser_tous_indicateurs
+            _, details_ind = analyser_tous_indicateurs(hist)
+            contexte["indicateurs"] = details_ind
+        except:
+            contexte["indicateurs"] = {}
+
+    # Régime de marché
+    try:
+        from analysis.regime import analyser_regime_complet, formater_regime
+        _, infos_reg, regime, vix = analyser_regime_complet(nom_marche, hist)
+        contexte["regime_msg"] = formater_regime(infos_reg, regime, vix)
+    except:
+        contexte["regime_msg"] = None
+
+    # Sentiment
+    try:
+        from analysis.sentiment import formater_sentiment
+        contexte["sentiment_msg"] = formater_sentiment(nom_marche)
+    except:
+        contexte["sentiment_msg"] = None
+
     return contexte
 
 # ── Construire le message d'alerte complet ─────────────────
@@ -236,6 +260,28 @@ def construire_alerte(nom_marche, resultats, pos, z_score, variation, volatilite
     msg += f"📰 *ACTUALITÉS RÉCENTES*\n"
     msg += formater_news(news) + "\n\n"
 
+    # Indicateurs techniques
+    details_ind = contexte.get("indicateurs", {})
+    if details_ind:
+        from analysis.indicateurs import formater_indicateurs
+        ind_msg = formater_indicateurs(details_ind)
+        if ind_msg:
+            msg += ind_msg + "\n"
+
+    # Régime de marché + corrélations
+    regime_msg = contexte.get("regime_msg")
+    if regime_msg:
+        msg += regime_msg + "\n"
+
+    # Sentiment
+    sentiment_msg = contexte.get("sentiment_msg")
+    if sentiment_msg:
+        msg += sentiment_msg + "\n"
+
+    # News réelles
+    msg += f"📰 *ACTUALITÉS RÉCENTES*\n"
+    msg += formater_news(news) + "\n\n"
+
     # Contexte macro
     msg += f"🌍 *CONTEXTE MACRO*\n"
     if contexte.get("macro"):
@@ -245,6 +291,11 @@ def construire_alerte(nom_marche, resultats, pos, z_score, variation, volatilite
     if contexte.get("cot"):
         msg += f"📊 COT: {contexte['cot']}\n"
     msg += "\n"
+
+    # Score qualité
+    qualite = contexte.get("score_qualite", 5)
+    barres  = "█" * qualite + "░" * (10 - qualite)
+    msg += f"⭐ *Score qualité: `{barres}` {qualite}/10*\n\n"
 
     # Validation
     msg += "━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -305,6 +356,23 @@ def scanner_signaux_forts():
             # 5. Récupérer news et contexte
             news     = get_news_marche(nom_marche, nb=4)
             contexte = get_contexte_macro(nom_marche)
+
+            # 5b. Score qualité global
+            score_qualite = resultats.get("score_qualite", 5)
+            contexte["score_qualite"] = score_qualite
+
+            # Vérification risque
+            from analysis.risk_manager import peut_ouvrir_trade
+            from data.paper_trading import get_compte
+            try:
+                compte = get_compte()
+                nb_pos = compte.get("nb_trades", 0)
+                autorise, msg_risque = peut_ouvrir_trade(nom_marche, direction, compte["solde"], nb_pos)
+                if not autorise:
+                    print(f"⛔ {nom_marche}: {msg_risque}")
+                    continue
+            except:
+                pass
 
             # 6. Enregistrer en attente
             position_data = {
