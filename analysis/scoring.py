@@ -11,6 +11,7 @@ from analysis.indicateurs import analyser_tous_indicateurs
 from analysis.chandeliers import detecter_patterns, score_chandeliers
 from analysis.regime      import analyser_regime_complet
 from analysis.sentiment   import score_sentiment_pour_trade
+from analysis.support_resistance import detecter_zones_sr, score_sr
 from config import MARCHES, SCORE_MIN_SIGNAL
 
 def analyser_marche(nom_marche):
@@ -127,6 +128,35 @@ def analyser_marche(nom_marche):
             resultats["infos_regime"]          = infos_reg
         except:
             resultats["composantes"]["regime"] = 0
+
+    # ── 8. Supports & Résistances dynamiques (max ±2) ─────
+    if hist is not None and not hist.empty and prix:
+        try:
+            # Utiliser 6 mois si dispo, sinon l'historique actuel
+            hist_long = hist
+            try:
+                hist_long = get_historique(symbole_yf, periode="6mo", intervalle="1d")
+            except:
+                pass
+
+            zones_sr = detecter_zones_sr(hist_long)
+            resultats["zones_sr"] = zones_sr
+
+            # Score S/R basé sur direction provisoire
+            direction_test_sr = "BUY" if resultats["score_total"] >= 1 else (
+                "SELL" if resultats["score_total"] <= -1 else "NEUTRE"
+            )
+            if direction_test_sr != "NEUTRE":
+                score_sr_val, detail_sr = score_sr(prix, zones_sr, direction_test_sr)
+                score_sr_val = max(-2, min(2, score_sr_val))
+                resultats["score_total"]          += score_sr_val
+                resultats["composantes"]["sr"]     = score_sr_val
+                if detail_sr and "neutre" not in detail_sr.lower():
+                    resultats["details"].append(detail_sr)
+            else:
+                resultats["composantes"]["sr"] = 0
+        except:
+            resultats["composantes"]["sr"] = 0
 
     # ── Déterminer direction et signal ────────────────────
     score = resultats["score_total"]

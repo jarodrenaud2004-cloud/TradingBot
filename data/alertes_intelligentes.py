@@ -12,9 +12,10 @@ from data.news       import get_news_marche, formater_news
 from data.fred_data  import analyser_macro
 from data.eia_data   import analyser_petrole
 from data.cot_data   import analyser_cot
-from analysis.scoring      import analyser_marche
-from analysis.positions    import proposer_position
-from analysis.chandeliers  import detecter_patterns, formater_patterns, score_chandeliers
+from analysis.scoring            import analyser_marche
+from analysis.positions          import proposer_position
+from analysis.chandeliers        import detecter_patterns, formater_patterns, score_chandeliers
+from analysis.support_resistance import get_zones_marche, formater_niveaux_sr
 from config import MARCHES, FRED_API_KEY, EIA_API_KEY
 
 # Marchés prioritaires avec le plus de données et de fiabilité
@@ -149,6 +150,24 @@ def get_contexte_macro(nom_marche):
         contexte["chandeliers"] = None
         contexte["score_chandeliers"] = 0
 
+    # Supports & Résistances dynamiques
+    try:
+        zones_sr = get_zones_marche(nom_marche, periode="6mo")
+        if zones_sr:
+            info = MARCHES.get(nom_marche)
+            if info:
+                from data.prix import get_historique
+                hist_sr = get_historique(info["symbole_yf"], periode="5d", intervalle="1d")
+                if hist_sr is not None and not hist_sr.empty:
+                    prix_actuel = hist_sr["Close"].iloc[-1]
+                    contexte["niveaux_sr"] = formater_niveaux_sr(zones_sr, prix_actuel, nb=3)
+                else:
+                    contexte["niveaux_sr"] = None
+        else:
+            contexte["niveaux_sr"] = None
+    except:
+        contexte["niveaux_sr"] = None
+
     # Figures chartistes
     try:
         from analysis.figures import detecter_triangle, detecter_tete_epaules, detecter_biseau, detecter_drapeau
@@ -255,6 +274,11 @@ def construire_alerte(nom_marche, resultats, pos, z_score, variation, volatilite
     figures_msg = contexte.get("figures")
     if figures_msg:
         msg += f"📐 *FIGURES CHARTISTES*\n{figures_msg}\n\n"
+
+    # Supports & Résistances
+    niveaux_sr = contexte.get("niveaux_sr")
+    if niveaux_sr:
+        msg += niveaux_sr
 
     # News réelles
     msg += f"📰 *ACTUALITÉS RÉCENTES*\n"

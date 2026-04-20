@@ -18,11 +18,13 @@ from data.alertes_intelligentes import (
     get_position_attente, valider_position, ignorer_position,
     get_positions_en_attente
 )
-from analysis.performance  import formater_performance
-from analysis.risk_manager import formater_etat_risque
-from analysis.regime       import analyser_regime_complet, get_vix, interpreter_vix
-from analysis.sentiment    import formater_sentiment, get_fear_greed_index
-from data.prix             import get_historique
+from analysis.performance        import formater_performance
+from analysis.risk_manager       import formater_etat_risque
+from analysis.regime             import analyser_regime_complet, get_vix, interpreter_vix
+from analysis.sentiment          import formater_sentiment, get_fear_greed_index
+from analysis.support_resistance import get_zones_marche, formater_niveaux_sr
+from analysis.backtesting        import backtest_strategie, formater_backtest, backtest_tous_marches, formater_synthese_backtests
+from data.prix                   import get_historique
 
 logging.basicConfig(level=logging.INFO)
 
@@ -47,6 +49,8 @@ async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         "/compte — Solde du compte\n\n"
         "📊 *Analyse Expert:*\n"
         "/marche WTI — Analyse ultra-complète\n"
+        "/niveaux WTI — Supports & Résistances\n"
+        "/backtest WTI — Test historique stratégie\n"
         "/performance — Mes statistiques\n"
         "/risque — Gestionnaire de risque\n\n"
         "📅 *Calendrier:*\n"
@@ -430,6 +434,106 @@ async def cmd_marche(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(msg, parse_mode="Markdown")
 
+# ── /niveaux ──────────────────────────────────────────────
+async def cmd_niveaux(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    """Affiche les supports et résistances dynamiques d'un marché"""
+    if not autorise(update): return
+
+    if not ctx.args:
+        await update.message.reply_text("Usage: /niveaux WTI\nEx: /niveaux GOLD")
+        return
+
+    nom = ctx.args[0].upper()
+    if nom not in MARCHES:
+        await update.message.reply_text(f"Marché inconnu: {nom}")
+        return
+
+    await update.message.reply_text(f"⏳ Calcul des niveaux S/R pour {nom}...")
+
+    info   = MARCHES[nom]
+    zones  = get_zones_marche(nom, periode="6mo")
+    hist   = get_historique(info["symbole_yf"], periode="5d", intervalle="1d")
+
+    if hist is None or hist.empty:
+        await update.message.reply_text("❌ Impossible de récupérer les données.")
+        return
+
+    prix_actuel = hist["Close"].iloc[-1]
+
+    if not zones:
+        await update.message.reply_text(
+            f"📊 *{info['nom']}*\n"
+            f"Prix actuel: `{prix_actuel:.4f}`\n\n"
+            "⚪ Aucun niveau S/R significatif détecté sur 6 mois.\n"
+            "Le marché manque de pivots clairs.",
+            parse_mode="Markdown"
+        )
+        return
+
+    msg  = f"📊 *NIVEAUX S/R — {info['nom']}*\n"
+    msg += f"_6 mois de données | {len(zones)} zones détectées_\n"
+    msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    msg += formater_niveaux_sr(zones, prix_actuel, nb=4)
+
+    # Zones majeures (3+ touches)
+    zones_majeures = [z for z in zones if z["touches"] >= 3]
+    if zones_majeures:
+        msg += f"⭐ *ZONES MAJEURES (3+ touches):*\n"
+        for z in zones_majeures[:4]:
+            emoji = "🟢" if z["type"] == "SUPPORT" else "🔴"
+            barres = "█" * z["force"] + "░" * (5 - z["force"])
+            msg += f"{emoji} `{z['prix']}` — {z['touches']} touches {barres}\n"
+        msg += "\n"
+
+    msg += "_Plus de touches = niveau plus fort_"
+
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+
+# ── /backtest ─────────────────────────────────────────────
+async def cmd_backtest(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    """Lance un backtest de la stratégie sur l'historique"""
+    if not autorise(update): return
+
+    if not ctx.args:
+        # Backtest sur tous les marchés prioritaires
+        await update.message.reply_text(
+            "⏳ Backtest sur tous les marchés...\n"
+            "_(1 an de données — peut prendre 30s)_",
+            parse_mode="Markdown"
+        )
+        resultats = backtest_tous_marches(periode="1y")
+        msg = formater_synthese_backtests(resultats)
+        await update.message.reply_text(msg, parse_mode="Markdown")
+        return
+
+    nom = ctx.args[0].upper()
+
+    # Période optionnelle (ex: /backtest WTI 2y)
+    periode = "1y"
+    if len(ctx.args) >= 2 and ctx.args[1] in ["3mo", "6mo", "1y", "2y"]:
+        periode = ctx.args[1]
+
+    if nom not in MARCHES:
+        await update.message.reply_text(
+            f"Marché inconnu: {nom}\n"
+            f"Usage: /backtest WTI\n"
+            f"Ou: /backtest WTI 2y\n"
+            f"Marchés dispo: {', '.join(MARCHES.keys())}"
+        )
+        return
+
+    await update.message.reply_text(
+        f"⏳ Backtest {nom} sur {periode}...\n"
+        "_(peut prendre 15-20 secondes)_",
+        parse_mode="Markdown"
+    )
+
+    res = backtest_strategie(nom, periode=periode)
+    msg = formater_backtest(res)
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+
 # ── /valider ───────────────────────────────────────────────
 async def cmd_valider(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not autorise(update): return
@@ -533,6 +637,8 @@ def lancer_bot():
     app.add_handler(CommandHandler("performance",    cmd_performance))
     app.add_handler(CommandHandler("risque",         cmd_risque))
     app.add_handler(CommandHandler("marche",         cmd_marche))
+    app.add_handler(CommandHandler("niveaux",        cmd_niveaux))
+    app.add_handler(CommandHandler("backtest",       cmd_backtest))
 
     print("✅ Bot Telegram démarré !")
     print("📱 Ouvre Telegram et envoie /start à ton bot")
