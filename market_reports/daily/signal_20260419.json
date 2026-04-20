@@ -1,0 +1,169 @@
+{
+  "date": "2026-04-19",
+  "generated_at": "2026-04-19T20:02:00+02:00",
+  "report_type": "daily_summary",
+  "note": "Sunday — last trading session was Friday 2026-04-17. Markets reopen Monday 2026-04-20.",
+  "global_signal": "MIXED",
+  "alert_level": "MODERATE",
+  "geopolitical_context": "Middle East conflict active. Strait of Hormuz intermittently disrupted since March 2026. US-Iran negotiations ongoing. WTI oscillated between $79 and $98 in 3 days.",
+  "assets": {
+    "EURUSD": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "level": 1.178,
+      "key_levels": [1.165, 1.170, 1.180, 1.185],
+      "note": "Struggling below 1.1800 resistance. Cautious mood around Iran talks."
+    },
+    "GBPUSD": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "level": 1.3500,
+      "key_levels": [1.340, 1.350, 1.360, 1.370],
+      "note": "Declining toward 1.3500 support. Short-term bearish despite BOE hike bets underpinning medium-term."
+    },
+    "USDJPY": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": 158.00,
+      "key_levels": [155.00, 157.00, 158.00, 160.00],
+      "note": "Holding support at 158.00 despite broad USD weakness. JPY not behaving as safe-haven vs USD."
+    },
+    "XAUUSD": {
+      "bias": "BULLISH",
+      "confidence": "HIGH",
+      "level": 4830.43,
+      "key_levels": [4650.0, 4750.0, 4830.0, 5000.0, 5100.0],
+      "note": "Geopolitical premium sustained. Central bank buying. JPMorgan/Goldman range $4000-$6300 for 2026."
+    },
+    "XAGUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": 80.77,
+      "key_levels": [76.0, 80.0, 85.0, 90.0],
+      "note": "Following gold. XAU/XAG ratio at 59.80."
+    },
+    "SP500": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": 7126.0,
+      "key_levels": [6900.0, 7000.0, 7126.0, 7300.0],
+      "note": "New all-time high on 17/04. Conditional on Hormuz de-escalation. VIX at 17.94."
+    },
+    "WTI": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "level": 92.0,
+      "key_levels": [79.0, 86.0, 92.0, 98.0, 100.0],
+      "note": "Extreme volatility. Hormuz open/close cycles create +/-20% swings. Avoid trading."
+    }
+  },
+  "risk_indicators": {
+    "VIX": 17.94,
+    "VIX_interpretation": "Moderate — below 25 threshold. Risk-on posture maintained.",
+    "US_10Y_yield": 4.26,
+    "US_2Y_yield": 3.71,
+    "yield_curve_spread_10Y_2Y": 0.55,
+    "yield_curve_status": "NOT_INVERTED",
+    "fear_greed_index": 63,
+    "fear_greed_label": "Greed",
+    "DXY": 98.0,
+    "DXY_trend": "DECLINING — 3rd consecutive weekly drop"
+  },
+  "key_risks": [
+    {
+      "risk": "Hormuz total re-closure",
+      "probability": "HIGH",
+      "impact": "Oil >$100, stagflation scenario, VIX spike, equities -5% to -10%",
+      "affected_assets": ["WTI", "SP500", "XAUUSD", "EURUSD"]
+    },
+    {
+      "risk": "US-Iran military escalation",
+      "probability": "MEDIUM",
+      "impact": "VIX >30, broad risk-off, gold surge, equity sell-off",
+      "affected_assets": ["all"]
+    },
+    {
+      "risk": "Surprise BOE rate hike end of April",
+      "probability": "MEDIUM",
+      "impact": "GBP/USD sharp rally, EUR/GBP drop",
+      "affected_assets": ["GBPUSD", "EURGBP"]
+    },
+    {
+      "risk": "US inflation data surprise to upside",
+      "probability": "MEDIUM",
+      "impact": "Fed rate cut expectations deferred, USD strengthens, equities under pressure",
+      "affected_assets": ["EURUSD", "GBPUSD", "SP500"]
+    }
+  ],
+  "opportunities": [
+    {
+      "rank": 1,
+      "asset": "XAUUSD",
+      "direction": "LONG",
+      "rationale": "Structural geopolitical premium, central bank buying, safe-haven demand",
+      "entry": "4750-4800",
+      "stop_loss": "4650",
+      "take_profit": "5000-5100",
+      "confidence": "HIGH"
+    },
+    {
+      "rank": 2,
+      "asset": "EURUSD",
+      "direction": "SHORT",
+      "rationale": "Clear resistance at 1.1800, cautious geopolitical mood, USD safe-haven demand",
+      "entry": "1.1780-1.1800",
+      "stop_loss": "1.1855",
+      "take_profit": "1.1650-1.1700",
+      "confidence": "MEDIUM"
+    },
+    {
+      "rank": 3,
+      "asset": "SP500",
+      "direction": "LONG",
+      "rationale": "All-time highs, low VIX, risk-on bias — conditional on Hormuz de-escalation confirmation",
+      "entry": "7050-7100",
+      "stop_loss": "6900",
+      "take_profit": "7300+",
+      "confidence": "MEDIUM",
+      "condition": "Requires Hormuz open confirmation at Monday open"
+    }
+  ],
+  "tomorrow_events": [
+    {
+      "date": "2026-04-20",
+      "event": "Hormuz/Iran geopolitical developments (Sunday evening)",
+      "importance": "CRITICAL",
+      "note": "Will set the tone for Monday open"
+    },
+    {
+      "date": "2026-04-20",
+      "event": "US Q1 2026 Earnings Season (ongoing)",
+      "importance": "MEDIUM",
+      "note": "Sector-specific volatility expected"
+    },
+    {
+      "date": "2026-04-30",
+      "event": "Fed & ECB rate decisions (upcoming)",
+      "importance": "HIGH",
+      "note": "Markets pricing in Fed hold, potential BOE hike"
+    }
+  ],
+  "macro_context": {
+    "IMF_global_growth_2026": 3.1,
+    "IMF_global_inflation_2026": 4.4,
+    "Fed_rate": "3.50-3.75%",
+    "next_Fed_meeting": "2026-04-30",
+    "next_ECB_meeting": "2026-04-30",
+    "next_BOJ_meeting": "2026-05-07",
+    "Nikkei_225": 58475.90,
+    "Nikkei_change_pct": -1.75,
+    "SP500_close": 7126.0,
+    "SP500_change_pct": 1.20,
+    "DowJones_close": 49447.0,
+    "DowJones_change_pct": 1.79,
+    "Gold_XAU": 4830.43,
+    "Silver_XAG": 80.77,
+    "WTI_estimate_19apr": 92.0,
+    "Brent_estimate_19apr": 98.0
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "date": "2026-04-20",
+  "generated_at": "2026-04-20T18:27:00Z",
+  "report_type": "daily_summary",
+  "global_signal": "MIXED",
+  "alert_level": "MODERATE",
+  "assets": {
+    "EURUSD": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "level": 1.1500,
+      "key_levels": [1.1580, 1.1480, 1.1400, 1.1380]
+    },
+    "GBPUSD": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "level": 1.3200,
+      "key_levels": [1.3280, 1.3150, 1.3080]
+    },
+    "USDJPY": {
+      "bias": "NEUTRAL",
+      "confidence": "LOW",
+      "level": 159.75,
+      "key_levels": [161.00, 160.00, 158.50, 157.00]
+    },
+    "XAUUSD": {
+      "bias": "BULLISH",
+      "confidence": "HIGH",
+      "level": 4812.00,
+      "key_levels": [4882.00, 4850.00, 4800.00, 4760.00, 4700.00]
+    },
+    "XAGUSD": {
+      "bias": "BULLISH",
+      "confidence": "MEDIUM",
+      "level": 80.30,
+      "key_levels": [83.00, 81.50, 79.00, 77.50]
+    },
+    "SP500": {
+      "bias": "BEARISH",
+      "confidence": "MEDIUM",
+      "level": 7109.14,
+      "key_levels": [7200.00, 7126.07, 7000.00, 6950.00]
+    },
+    "WTI": {
+      "bias": "BULLISH",
+      "confidence": "HIGH",
+      "level": 88.80,
+      "key_levels": [95.00, 93.00, 88.00, 83.00]
+    }
+  },
+  "risk_indicators": {
+    "VIX": 17.48,
+    "US10Y": 4.30,
+    "US2Y": 3.81,
+    "yield_spread_10Y_2Y": 0.49,
+    "DXY": 98.31,
+    "fear_greed_index": "N/D"
+  },
+  "key_risks": [
+    "Escalade conflit US-Iran — blocage Strait of Hormuz prolongé",
+    "Prix pétrole Brent > 100$ provoquant un choc inflationniste mondial",
+    "VIX > 25 — passage en mode risk-off généralisé",
+    "Résultats trimestriels tech décevants (78 publications le 21 avril)",
+    "Stagflation si données emploi/conso US se dégradent"
+  ],
+  "opportunities": [
+    {
+      "asset": "XAUUSD",
+      "direction": "LONG",
+      "confidence": "HIGH",
+      "entry_zone": [4760, 4800],
+      "stop_loss": 4700,
+      "take_profit": [4900, 5000],
+      "rationale": "Tendance haussière structurelle, +40% an, inflation et incertitude géopolitique soutiennent la demande de valeur refuge"
+    },
+    {
+      "asset": "WTI",
+      "direction": "LONG",
+      "confidence": "HIGH",
+      "entry_zone": [86, 88],
+      "stop_loss": 83,
+      "take_profit": [93, 95],
+      "rationale": "Blocage Ormuz = réduction de l'offre, prime géopolitique persistante"
+    },
+    {
+      "asset": "EURUSD",
+      "direction": "SHORT",
+      "confidence": "MEDIUM",
+      "entry_zone": [1.1480, 1.1520],
+      "stop_loss": 1.1580,
+      "take_profit": [1.1400, 1.1380],
+      "rationale": "DXY en hausse, FMI révise zone euro à 1.1%, risk-off favorise le dollar"
+    }
+  ],
+  "tomorrow_events": [
+    {
+      "date": "2026-04-21",
+      "description": "44 événements économiques programmés — détails sur Econoday",
+      "importance": "MODERATE"
+    },
+    {
+      "date": "2026-04-21",
+      "description": "78 publications de résultats d'entreprises — saison des résultats Q1 2026",
+      "importance": "MODERATE"
+    },
+    {
+      "date": "2026-04-21",
+      "description": "Développements continus US-Iran / Ormuz — facteur géopolitique dominant",
+      "importance": "HIGH"
+    }
+  ],
+  "top_opportunity": "XAU/USD LONG — Zone 4760-4800$ — Tendance haussière + valeur refuge inflationniste",
+  "macro_context": {
+    "imf_global_growth_2026": "3.1%",
+    "imf_global_inflation_2026": "4.4%",
+    "imf_eurozone_growth_2026": "1.1%",
+    "main_geopolitical_risk": "US-Iran war / Strait of Hormuz blockade",
+    "ceasefire_status": "FRAGILE — reprise des hostilités le 20 avril"
+  },
+  "last_updated": "2026-04-20T18:27:00Z"
+}

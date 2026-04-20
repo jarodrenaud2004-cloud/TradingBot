@@ -12,8 +12,9 @@ from data.news       import get_news_marche, formater_news
 from data.fred_data  import analyser_macro
 from data.eia_data   import analyser_petrole
 from data.cot_data   import analyser_cot
-from analysis.scoring   import analyser_marche
-from analysis.positions import proposer_position
+from analysis.scoring      import analyser_marche
+from analysis.positions    import proposer_position
+from analysis.chandeliers  import detecter_patterns, formater_patterns, score_chandeliers
 from config import MARCHES, FRED_API_KEY, EIA_API_KEY
 
 # Marchés prioritaires avec le plus de données et de fiabilité
@@ -134,6 +135,41 @@ def get_contexte_macro(nom_marche):
     except:
         contexte["macro"] = None
 
+    # Chandeliers japonais
+    try:
+        info = MARCHES.get(nom_marche)
+        if info:
+            from data.prix import get_historique
+            hist = get_historique(info["symbole_yf"], periode="1mo", intervalle="1d")
+            if hist is not None and not hist.empty:
+                patterns = detecter_patterns(hist)
+                contexte["chandeliers"] = formater_patterns(patterns)
+                contexte["score_chandeliers"] = score_chandeliers(patterns)
+    except:
+        contexte["chandeliers"] = None
+        contexte["score_chandeliers"] = 0
+
+    # Figures chartistes
+    try:
+        from analysis.figures import detecter_triangle, detecter_tete_epaules, detecter_biseau, detecter_drapeau
+        figures = []
+        if hist is not None and not hist.empty:
+            te_type, _ = detecter_tete_epaules(hist)
+            if te_type:
+                figures.append("🎯 Tête-Épaules " + ("Inversé → HAUSSIER" if te_type == "TE_HAUSSIER" else "→ BAISSIER"))
+            tri, _ = detecter_triangle(hist)
+            if tri:
+                figures.append(f"📐 Triangle {tri.replace('_', ' ').title()}")
+            bi, _ = detecter_biseau(hist)
+            if bi:
+                figures.append(f"↗ Biseau {bi.replace('_', ' ').title()}")
+            dr, _ = detecter_drapeau(hist)
+            if dr:
+                figures.append(f"🚩 {dr.replace('_', ' ').title()}")
+        contexte["figures"] = "\n".join(f"• {f}" for f in figures) if figures else None
+    except:
+        contexte["figures"] = None
+
     # EIA (pétrole/gaz uniquement)
     if nom_marche in ["WTI", "NATGAS"]:
         try:
@@ -185,6 +221,16 @@ def construire_alerte(nom_marche, resultats, pos, z_score, variation, volatilite
         if d and "indisponible" not in d.lower():
             msg += f"• {d}\n"
     msg += "\n"
+
+    # Chandeliers japonais
+    chandelier_msg = contexte.get("chandeliers")
+    if chandelier_msg:
+        msg += chandelier_msg + "\n"
+
+    # Figures chartistes
+    figures_msg = contexte.get("figures")
+    if figures_msg:
+        msg += f"📐 *FIGURES CHARTISTES*\n{figures_msg}\n\n"
 
     # News réelles
     msg += f"📰 *ACTUALITÉS RÉCENTES*\n"
