@@ -605,6 +605,251 @@ async def cmd_ignorer(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text(f"❌ Position #{numero} introuvable.")
 
+# ── /menu — Toutes les commandes cliquables ───────────────
+async def cmd_menu(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if not autorise(update): return
+    await update.message.reply_text(
+        "📊 ANALYSE PAR MARCHÉ\n"
+        "/wti — Pétrole WTI\n"
+        "/gold — Or\n"
+        "/silver — Argent\n"
+        "/cac — CAC 40\n"
+        "/dax — DAX\n"
+        "/natgas — Gaz Naturel\n"
+        "/corn — Maïs\n"
+        "/wheat — Blé\n"
+        "/tte — TotalEnergies\n"
+        "/mc — LVMH\n"
+        "/air — Airbus\n"
+        "/bnp — BNP Paribas\n"
+        "/san — Sanofi\n"
+        "/lor — L'Oréal\n"
+    )
+    await update.message.reply_text(
+        "🔍 SIGNAUX & POSITIONS\n"
+        "/scan — Scanner tous les marchés\n"
+        "/positionwti — Position WTI\n"
+        "/positiongold — Position Or\n"
+        "/positioncac — Position CAC 40\n"
+        "/positiondax — Position DAX\n"
+        "/positionall — Toutes les meilleures positions\n"
+    )
+    await update.message.reply_text(
+        "📐 NIVEAUX S/R\n"
+        "/niveauxwti — Supports/Résistances WTI\n"
+        "/niveauxgold — Supports/Résistances Or\n"
+        "/niveauxcac — Supports/Résistances CAC 40\n"
+        "/niveauxdax — Supports/Résistances DAX\n"
+    )
+    await update.message.reply_text(
+        "🧪 BACKTESTING\n"
+        "/backtestwti — Backtest WTI 1 an\n"
+        "/backtestgold — Backtest Or 1 an\n"
+        "/backtestcac — Backtest CAC 40 1 an\n"
+        "/backtestdax — Backtest DAX 1 an\n"
+        "/backtestall — Synthèse tous les marchés\n"
+    )
+    await update.message.reply_text(
+        "🚨 ALERTES\n"
+        "/valider — Voir alertes en attente\n\n"
+        "💼 COMPTE DEMO\n"
+        "/compte — Solde et P&L\n"
+        "/portefeuille — Positions ouvertes\n"
+        "/historique — Trades passés\n"
+        "/fermerttout — Fermer toutes les positions\n\n"
+        "📈 STATS\n"
+        "/performance — Mes statistiques\n"
+        "/risque — Gestionnaire de risque\n\n"
+        "📅 CALENDRIER\n"
+        "/calendrier — Annonces de la semaine\n"
+        "/aujourd_hui — Annonces du jour"
+    )
+
+# ── Commandes rapides par marché ──────────────────────────
+async def _analyse_rapide(update, nom_marche, label):
+    await update.message.reply_text(f"⏳ Analyse {label} en cours...")
+    resultats = analyser_marche(nom_marche)
+    msg = formater_message(resultats)
+    if msg:
+        await update.message.reply_text(msg, parse_mode="Markdown")
+    else:
+        await update.message.reply_text(f"⚪ Pas de signal clair sur {label}.")
+
+async def cmd_wti(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "WTI", "Pétrole WTI")
+
+async def cmd_gold(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "GOLD", "Or")
+
+async def cmd_silver(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "SILVER", "Argent")
+
+async def cmd_cac(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "CAC40", "CAC 40")
+
+async def cmd_dax(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "DAX", "DAX")
+
+async def cmd_natgas(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "NATGAS", "Gaz Naturel")
+
+async def cmd_corn(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "CORN", "Maïs")
+
+async def cmd_wheat(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "WHEAT", "Blé")
+
+async def cmd_tte(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "TTE", "TotalEnergies")
+
+async def cmd_mc(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "MC", "LVMH")
+
+async def cmd_air(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "AIR", "Airbus")
+
+async def cmd_bnp(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "BNP", "BNP Paribas")
+
+async def cmd_san(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "SAN", "Sanofi")
+
+async def cmd_lor(update, ctx):
+    if not autorise(update): return
+    await _analyse_rapide(update, "OR", "L'Oréal")
+
+# ── Commandes position rapide ─────────────────────────────
+async def _position_rapide(update, nom_marche, label):
+    await update.message.reply_text(f"⏳ Position {label} en cours...")
+    pos = proposer_position(nom_marche)
+    from analysis.positions import formater_position
+    msg = formater_position(pos)
+    if msg:
+        await update.message.reply_text(msg, parse_mode="Markdown")
+    else:
+        await update.message.reply_text(f"⚪ Pas de position claire sur {label}.")
+
+async def cmd_positionwti(update, ctx):
+    if not autorise(update): return
+    await _position_rapide(update, "WTI", "WTI")
+
+async def cmd_positiongold(update, ctx):
+    if not autorise(update): return
+    await _position_rapide(update, "GOLD", "Or")
+
+async def cmd_positioncac(update, ctx):
+    if not autorise(update): return
+    await _position_rapide(update, "CAC40", "CAC 40")
+
+async def cmd_positiondax(update, ctx):
+    if not autorise(update): return
+    await _position_rapide(update, "DAX", "DAX")
+
+async def cmd_positionall(update, ctx):
+    if not autorise(update): return
+    await update.message.reply_text("⏳ Analyse de tous les marchés...")
+    from analysis.positions import analyser_tous_et_proposer, formater_position
+    positions = analyser_tous_et_proposer()
+    if not positions:
+        await update.message.reply_text("⚪ Aucune position intéressante en ce moment.")
+        return
+    for pos in positions[:5]:
+        msg = formater_position(pos)
+        if msg:
+            await update.message.reply_text(msg, parse_mode="Markdown")
+
+# ── Commandes niveaux rapides ─────────────────────────────
+async def _niveaux_rapide(update, nom_marche, label):
+    await update.message.reply_text(f"⏳ Niveaux S/R {label}...")
+    info  = MARCHES[nom_marche]
+    zones = get_zones_marche(nom_marche, periode="6mo")
+    hist  = get_historique(info["symbole_yf"], periode="5d", intervalle="1d")
+    if hist is None or hist.empty:
+        await update.message.reply_text("❌ Données indisponibles.")
+        return
+    prix_actuel = hist["Close"].iloc[-1]
+    if not zones:
+        await update.message.reply_text(f"⚪ Aucun niveau S/R significatif sur {label}.")
+        return
+    msg = f"📊 NIVEAUX S/R — {label}\n\n"
+    msg += formater_niveaux_sr(zones, prix_actuel, nb=4)
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+async def cmd_niveauxwti(update, ctx):
+    if not autorise(update): return
+    await _niveaux_rapide(update, "WTI", "WTI")
+
+async def cmd_niveauxgold(update, ctx):
+    if not autorise(update): return
+    await _niveaux_rapide(update, "GOLD", "Or")
+
+async def cmd_niveauxcac(update, ctx):
+    if not autorise(update): return
+    await _niveaux_rapide(update, "CAC40", "CAC 40")
+
+async def cmd_niveauxdax(update, ctx):
+    if not autorise(update): return
+    await _niveaux_rapide(update, "DAX", "DAX")
+
+# ── Commandes backtest rapides ────────────────────────────
+async def _backtest_rapide(update, nom_marche, label):
+    await update.message.reply_text(f"⏳ Backtest {label} sur 1 an... (15-20 sec)")
+    res = backtest_strategie(nom_marche, periode="1y")
+    msg = formater_backtest(res)
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+async def cmd_backtestwti(update, ctx):
+    if not autorise(update): return
+    await _backtest_rapide(update, "WTI", "WTI")
+
+async def cmd_backtestgold(update, ctx):
+    if not autorise(update): return
+    await _backtest_rapide(update, "GOLD", "Or")
+
+async def cmd_backtestcac(update, ctx):
+    if not autorise(update): return
+    await _backtest_rapide(update, "CAC40", "CAC 40")
+
+async def cmd_backtestdax(update, ctx):
+    if not autorise(update): return
+    await _backtest_rapide(update, "DAX", "DAX")
+
+async def cmd_backtestall(update, ctx):
+    if not autorise(update): return
+    await update.message.reply_text("⏳ Backtest de tous les marchés... (30-60 sec)")
+    resultats = backtest_tous_marches(periode="1y")
+    msg = formater_synthese_backtests(resultats)
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+# ── /fermerttout ──────────────────────────────────────────
+async def cmd_fermerttout(update, ctx):
+    if not autorise(update): return
+    resultats = fermer_tous()
+    if not resultats:
+        await update.message.reply_text("⚪ Aucune position ouverte.")
+        return
+    pl_total = sum(t["pl"] for t in resultats)
+    emoji = "📈" if pl_total >= 0 else "📉"
+    msg = f"✅ {len(resultats)} position(s) fermée(s)\n\n"
+    for t in resultats:
+        e = "✅" if t["pl"] >= 0 else "❌"
+        msg += f"{e} {t['direction']} {t['marche']}: {t['pl']:+.2f} €\n"
+    msg += f"\n{emoji} P&L total: {pl_total:+.2f} €"
+    await update.message.reply_text(msg)
+
 # ── Envoi d'alerte automatique ─────────────────────────────
 async def envoyer_alerte(app, message):
     """Envoie une alerte automatique sur Telegram"""
@@ -639,6 +884,46 @@ def lancer_bot():
     app.add_handler(CommandHandler("marche",         cmd_marche))
     app.add_handler(CommandHandler("niveaux",        cmd_niveaux))
     app.add_handler(CommandHandler("backtest",       cmd_backtest))
+    app.add_handler(CommandHandler("menu",           cmd_menu))
+
+    # Commandes rapides par marché
+    app.add_handler(CommandHandler("wti",            cmd_wti))
+    app.add_handler(CommandHandler("gold",           cmd_gold))
+    app.add_handler(CommandHandler("silver",         cmd_silver))
+    app.add_handler(CommandHandler("cac",            cmd_cac))
+    app.add_handler(CommandHandler("dax",            cmd_dax))
+    app.add_handler(CommandHandler("natgas",         cmd_natgas))
+    app.add_handler(CommandHandler("corn",           cmd_corn))
+    app.add_handler(CommandHandler("wheat",          cmd_wheat))
+    app.add_handler(CommandHandler("tte",            cmd_tte))
+    app.add_handler(CommandHandler("mc",             cmd_mc))
+    app.add_handler(CommandHandler("air",            cmd_air))
+    app.add_handler(CommandHandler("bnp",            cmd_bnp))
+    app.add_handler(CommandHandler("san",            cmd_san))
+    app.add_handler(CommandHandler("lor",            cmd_lor))
+
+    # Commandes position rapide
+    app.add_handler(CommandHandler("positionwti",    cmd_positionwti))
+    app.add_handler(CommandHandler("positiongold",   cmd_positiongold))
+    app.add_handler(CommandHandler("positioncac",    cmd_positioncac))
+    app.add_handler(CommandHandler("positiondax",    cmd_positiondax))
+    app.add_handler(CommandHandler("positionall",    cmd_positionall))
+
+    # Commandes niveaux rapides
+    app.add_handler(CommandHandler("niveauxwti",     cmd_niveauxwti))
+    app.add_handler(CommandHandler("niveauxgold",    cmd_niveauxgold))
+    app.add_handler(CommandHandler("niveauxcac",     cmd_niveauxcac))
+    app.add_handler(CommandHandler("niveauxdax",     cmd_niveauxdax))
+
+    # Commandes backtest rapides
+    app.add_handler(CommandHandler("backtestwti",    cmd_backtestwti))
+    app.add_handler(CommandHandler("backtestgold",   cmd_backtestgold))
+    app.add_handler(CommandHandler("backtestcac",    cmd_backtestcac))
+    app.add_handler(CommandHandler("backtestdax",    cmd_backtestdax))
+    app.add_handler(CommandHandler("backtestall",    cmd_backtestall))
+
+    # Fermer tout en un mot
+    app.add_handler(CommandHandler("fermerttout",    cmd_fermerttout))
 
     print("✅ Bot Telegram démarré !")
     print("📱 Ouvre Telegram et envoie /start à ton bot")
