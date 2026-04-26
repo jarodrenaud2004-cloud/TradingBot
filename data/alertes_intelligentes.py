@@ -22,16 +22,17 @@ from config import MARCHES, FRED_API_KEY, EIA_API_KEY
 MARCHES_PRIORITAIRES = ["WTI", "GOLD", "CAC40", "DAX", "SILVER", "TTE", "MC", "AIR", "BNP"]
 
 # ── Seuils mode Z-SCORE (mouvement anormal) ───────────────
-Z_SCORE_SEUIL   = 1.5   # Abaissé de 1.8 → plus sensible
-Z_SCORE_EXTREME = 1.8   # Abaissé de 2.0
+Z_SCORE_SEUIL   = 1.5   # Mouvement inhabituel détecté
+Z_SCORE_EXTREME = 1.8   # Mouvement très fort
 
 # ── Seuils mode TECHNIQUE (signal sans mouvement anormal) ─
-SCORE_MIN_TECHNIQUE = 3   # Score >= 3 → signal fort même sans z-score
-RATIO_MIN_TECHNIQUE = 1.5 # Ratio minimum pour mode technique
-RATIO_MIN_ZSCORE    = 1.8 # Ratio minimum pour mode z-score
+SCORE_MIN_TECHNIQUE = 3   # Score >= 3 minimum
+SCORE_MIN = 1             # Score minimum mode z-score
 
-# Score minimum pour mode z-score
-SCORE_MIN = 1
+# ── Filtres de qualité (communs aux deux modes) ────────────
+RATIO_MIN           = 2.0  # Ratio R/R minimum — standard pro (gain = 2x le risque)
+SCORE_QUALITE_MIN   = 6    # Score qualité minimum /10
+NB_COMPOSANTES_MIN  = 3    # Au moins 3 indicateurs doivent confirmer
 
 # Mémoire anti-doublon sur la journée (marché + direction)
 _signaux_journee = {}
@@ -403,22 +404,36 @@ def scanner_signaux_forts():
                 print(f"  {nom_marche}: signal {direction} déjà envoyé aujourd'hui")
                 continue
 
-            # ── Ratio minimum selon le mode ────────────────
-            ratio_min = RATIO_MIN_ZSCORE if mode_zscore else RATIO_MIN_TECHNIQUE
+            # ── Filtre qualité : score /10 ─────────────────
+            score_qualite = resultats.get("score_qualite", 5)
+            if score_qualite < SCORE_QUALITE_MIN:
+                print(f"  {nom_marche}: qualité {score_qualite}/10 < {SCORE_QUALITE_MIN} requis")
+                continue
 
-            # 4. Calculer la position
+            # ── Filtre : nb d'indicateurs qui confirment ───
+            composantes = resultats.get("composantes", {})
+            nb_confirmes = sum(
+                1 for v in composantes.values()
+                if (direction == "BUY" and v > 0) or (direction == "SELL" and v < 0)
+            )
+            if nb_confirmes < NB_COMPOSANTES_MIN:
+                print(f"  {nom_marche}: seulement {nb_confirmes} indicateurs confirment (min {NB_COMPOSANTES_MIN})")
+                continue
+
+            # ── Filtre ratio R/R ───────────────────────────
             pos = proposer_position(nom_marche)
-            if not pos or pos["ratio"] < ratio_min:
-                print(f"  {nom_marche}: ratio {pos['ratio'] if pos else 'N/A'} < {ratio_min}")
-                continue  # Ratio insuffisant
+            if not pos or pos["ratio"] < RATIO_MIN:
+                print(f"  {nom_marche}: ratio {pos['ratio'] if pos else 'N/A'} < {RATIO_MIN} requis")
+                continue
 
             # 5. Récupérer news et contexte
             news     = get_news_marche(nom_marche, nb=4)
             contexte = get_contexte_macro(nom_marche)
-
-            # 5b. Score qualité global
-            score_qualite = resultats.get("score_qualite", 5)
             contexte["score_qualite"] = score_qualite
+
+            # ── Résumé du signal pour log ──────────────────
+            mode_str = "Z-SCORE" if mode_zscore else "TECHNIQUE"
+            print(f"  ✅ {nom_marche} [{mode_str}] score={score} qualité={score_qualite}/10 ratio={pos['ratio']} composantes={nb_confirmes}")
 
             # Vérification risque
             from analysis.risk_manager import peut_ouvrir_trade
