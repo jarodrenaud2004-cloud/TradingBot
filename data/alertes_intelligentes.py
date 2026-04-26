@@ -19,16 +19,22 @@ from analysis.support_resistance import get_zones_marche, formater_niveaux_sr
 from config import MARCHES, FRED_API_KEY, EIA_API_KEY
 
 # Marchés prioritaires avec le plus de données et de fiabilité
-MARCHES_PRIORITAIRES = ["WTI", "GOLD", "CAC40", "DAX"]
+MARCHES_PRIORITAIRES = ["WTI", "GOLD", "CAC40", "DAX", "SILVER", "TTE", "MC", "AIR", "BNP"]
 
-# Seuil : mouvement > Z_SCORE_SEUIL écarts-types = anormal
-Z_SCORE_SEUIL = 1.8   # ~95% des mouvements sont en dessous
+# ── Seuils mode Z-SCORE (mouvement anormal) ───────────────
+Z_SCORE_SEUIL   = 1.5   # Abaissé de 1.8 → plus sensible
+Z_SCORE_EXTREME = 1.8   # Abaissé de 2.0
 
-# Score technique minimum pour alerter
+# ── Seuils mode TECHNIQUE (signal sans mouvement anormal) ─
+SCORE_MIN_TECHNIQUE = 3   # Score >= 3 → signal fort même sans z-score
+RATIO_MIN_TECHNIQUE = 1.5 # Ratio minimum pour mode technique
+RATIO_MIN_ZSCORE    = 1.8 # Ratio minimum pour mode z-score
+
+# Score minimum pour mode z-score
 SCORE_MIN = 1
 
-# Si z-score extrême, alerter même sans signal technique fort
-Z_SCORE_EXTREME = 2.0
+# Mémoire anti-doublon sur la journée (marché + direction)
+_signaux_journee = {}
 
 # Fichier des positions en attente de validation
 FICHIER_ATTENTE = "positions_attente.json"
@@ -328,25 +334,31 @@ def construire_alerte(nom_marche, resultats, pos, z_score, variation, volatilite
 
     return msg
 
+# ── Anti-doublon journalier ────────────────────────────────
+def _deja_envoye_aujourd_hui(nom_marche, direction):
+    """Vérifie si ce signal a déjà été envoyé aujourd'hui."""
+    from datetime import datetime
+    cle  = f"{nom_marche}_{direction}_{datetime.now().strftime('%Y-%m-%d')}"
+    if cle in _signaux_journee:
+        return True
+    _signaux_journee[cle] = True
+    return False
+
+
 # ── Scanner les marchés prioritaires ──────────────────────
 def scanner_signaux_forts():
     """
-    Scanne les marchés prioritaires.
-    Retourne les alertes à envoyer (mouvements anormaux + signal fort).
+    Scanne les marchés en deux modes :
+    MODE 1 — Z-score : mouvement statistiquement anormal → alerte
+    MODE 2 — Technique : signal fort (score>=3) sans attendre mouvement anormal
+
+    Les deux modes sont complémentaires.
     """
     alertes = []
 
     for nom_marche in MARCHES_PRIORITAIRES:
         try:
-            # 1. Vérifier si le mouvement est statistiquement anormal
-            z_score, variation, volatilite_normale = calculer_zscore(nom_marche)
-            if z_score is None:
-                continue
-
-            if abs(z_score) < Z_SCORE_SEUIL:
-                continue  # Mouvement normal, pas d'alerte
-
-            # 2. Vérifier le signal technique
+            # ── Analyse commune ────────────────────────────
             resultats = analyser_marche(nom_marche)
             if not resultats:
                 continue
@@ -354,27 +366,50 @@ def scanner_signaux_forts():
             score     = resultats.get("score_total", 0)
             direction = resultats.get("direction", "NEUTRE")
 
-            # Cas extrême : mouvement très fort → alerter même sans signal technique
-            extreme = abs(z_score) >= Z_SCORE_EXTREME
-            if not extreme:
-                if abs(score) < SCORE_MIN:
-                    continue  # Signal technique trop faible
+            z_score, variation, volatilite_normale = calculer_zscore(nom_marche)
+            if z_score is None:
+                z_score = 0; variation = 0; volatilite_normale = 0
 
-            # 3. Déterminer la direction (signal technique ou mouvement)
-            if direction == "NEUTRE" or abs(score) < SCORE_MIN:
-                # Pas de signal technique → la direction suit le mouvement du prix
+            # ── MODE 1 : Mouvement anormal (Z-score) ───────
+            mode_zscore = abs(z_score) >= Z_SCORE_SEUIL
+
+            # ── MODE 2 : Signal technique fort ─────────────
+            mode_technique = (
+                abs(score) >= SCORE_MIN_TECHNIQUE and
+                direction != "NEUTRE"
+            )
+
+            # Si aucun des deux modes → pas d'alerte
+            if not mode_zscore and not mode_technique:
+                print(f"  {nom_marche}: z={z_score:.2f} score={score} → aucun mode actif")
+                continue
+
+            # ── Déterminer la direction finale ─────────────
+            if direction == "NEUTRE" and mode_zscore:
                 direction = "SELL" if variation < 0 else "BUY"
 
-            # Cohérence mouvement/signal (seulement si signal technique présent)
-            if abs(score) >= SCORE_MIN and direction != "NEUTRE":
+            if direction == "NEUTRE":
+                continue
+
+            # Cohérence mouvement/signal en mode z-score
+            if mode_zscore and abs(score) >= SCORE_MIN:
                 if direction == "BUY" and variation < 0:
                     continue
                 if direction == "SELL" and variation > 0:
                     continue
 
+            # Anti-doublon : ne pas renvoyer le même signal aujourd'hui
+            if _deja_envoye_aujourd_hui(nom_marche, direction):
+                print(f"  {nom_marche}: signal {direction} déjà envoyé aujourd'hui")
+                continue
+
+            # ── Ratio minimum selon le mode ────────────────
+            ratio_min = RATIO_MIN_ZSCORE if mode_zscore else RATIO_MIN_TECHNIQUE
+
             # 4. Calculer la position
             pos = proposer_position(nom_marche)
-            if not pos or pos["ratio"] < 1.8:
+            if not pos or pos["ratio"] < ratio_min:
+                print(f"  {nom_marche}: ratio {pos['ratio'] if pos else 'N/A'} < {ratio_min}")
                 continue  # Ratio insuffisant
 
             # 5. Récupérer news et contexte
